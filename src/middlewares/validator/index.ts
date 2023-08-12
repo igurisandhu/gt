@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { AnyZodObject } from "zod";
+import { AnyZodObject, ZodSchema } from "zod";
+import responses from "../../utilities/responses";
 
 const validate =
-  (schema: (req: Request) => AnyZodObject) =>
+  (schema: (req: Request) => ZodSchema) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema(req).parseAsync({
@@ -11,8 +12,15 @@ const validate =
         params: req.params,
       });
       return next();
-    } catch (error) {
-      return res.status(400).json(error);
+    } catch (error: any) {
+      const formatted = error.flatten();
+
+      return responses.requestDataValidatorError(
+        req,
+        res,
+        {},
+        formatted?.fieldErrors?.body?.join(", "),
+      );
     }
   };
 

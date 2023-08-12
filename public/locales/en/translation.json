@@ -3,6 +3,9 @@
   "NOT_FOUND_RESPONSE": "{{module}} not found!",
   "AUTH_FAIL_RESPONSE": "Unauthriged Access!",
   "SUCCESS_RESPONSE": "Success",
-  "INVALID_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} must be {type}",
-  "NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} is required!"
+  "INVALID_REQUEST_DATA_RESPONSE": "Invalid Request Data",
+  "INVALID_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} must be {type}!",
+  "NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} is required!",
+  "WORNG_PASSWORD_FORMAT": "Password must be 8 letters long!",
+  "INVALID_REQUEST_PARAM_VALUE": "{{key}} has invalid value!"
 }

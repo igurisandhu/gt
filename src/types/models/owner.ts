@@ -1,11 +1,9 @@
-interface IOwner {
-  name: string;
-  email: string;
-  phone: number;
-  phoneCountryCode: number;
-  country: string;
-  countryCodeAlphabet: string;
-  avatar?: string;
+import { ObjectId } from "mongoose";
+import { IOwner } from "../controllers/owner";
+
+export interface IOnwnerSchema extends IOwner {
+  _id: ObjectId;
+  valifatePassword(password: string): Promise<boolean>;
 }
 
-export default IOwner;
+export default IOnwnerSchema;

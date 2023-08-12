@@ -18,5 +18,3 @@ async function run() {
   // 4. Connect to MongoDB
   await connect(MONGO_DB_URI);
 }
-
-//   console.log(user.email); // 'bill@initech.com'

@@ -22,7 +22,7 @@ const responses = {
   ) => {
     const status: number = 200;
     const prepareResponse: TResponse = {
-      message: req.t(successMessage || "SUCCESS_RESPONSE"),
+      message: successMessage || req.t("SUCCESS_RESPONSE"),
       data,
       error: false,
       status,
@@ -67,11 +67,11 @@ const responses = {
     key: string,
     correctType: string,
   ) => {
-    const status: number = 401;
+    const status: number = 400;
     const prepareResponse: TResponse = {
       message: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
         key,
-        tyep: correctType,
+        type: correctType,
       }),
       data,
       error: true,
@@ -87,9 +87,27 @@ const responses = {
     data: object,
     key: string,
   ) => {
-    const status: number = 401;
+    const status: number = 400;
     const prepareResponse: TResponse = {
       message: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", { key }),
+      data,
+      error: true,
+      status,
+      success: false,
+      notFound: false,
+    };
+    return res.status(status).json(prepareResponse);
+  },
+  // zod validator error
+  requestDataValidatorError: async (
+    req: Request,
+    res: Response,
+    data: object,
+    message?: string,
+  ) => {
+    const status: number = 400;
+    const prepareResponse: TResponse = {
+      message: message || req.t("INVALID_REQUEST_DATA_RESPONSE"),
       data,
       error: true,
       status,
