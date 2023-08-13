@@ -4,10 +4,12 @@ import {
   IOwnerProfileWithAuth,
   IOwnerSignupRequest,
   IOwnerProfileWithOptionalPassword,
+  IOwnerProfile,
 } from "../../types/controllers/owner";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
-import IOnwnerSchema from "../../types/models/owner";
+import { generateQRCode } from "../../utilities/qrcode";
+import { IOwnerCompanyProfile } from "../../types/controllers/ownerCompany";
 
 const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
@@ -42,12 +44,16 @@ const signup = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
   try {
-    let { email, password }: { email: string; password: string } = req.body;
+    const { email, password }: { email: string; password: string } = req.body;
 
-    let owner = await OwnerModel.findOne({ email });
+    const owner = await OwnerModel.findOne({ email });
 
-    if (!owner) {
+    if (!owner || owner.isDeleted == true) {
       return responses.notFound(req, res, {}, "Owner Account");
+    }
+
+    if (owner.isActive == false) {
+      return responses.notActive(req, res, {}, "Owner Account");
     }
 
     const isPasswordValid: boolean = await owner.valifatePassword(password);

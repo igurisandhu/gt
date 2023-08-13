@@ -7,5 +7,6 @@
   "INVALID_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} must be {type}!",
   "NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE": "{{key}} is required!",
   "WORNG_PASSWORD_FORMAT": "Password must be 8 letters long!",
-  "INVALID_REQUEST_PARAM_VALUE": "{{key}} has invalid value!"
+  "INVALID_REQUEST_PARAM_VALUE": "{{key}} has invalid value!",
+  "DEACTIVATED_RESPONSE": "{{module}} is deactivaed"
 }

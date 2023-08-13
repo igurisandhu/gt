@@ -1,15 +1,5 @@
-import { ObjectId } from "mongoose";
+import { IOwnerCompany } from "../controllers/ownerCompany";
 
-interface IOwnerCompany {
-  owner_id: ObjectId;
-  name: string;
-  email: string;
-  phone: number;
-  phoneCountryCode: number;
-  country: string;
-  countryCodeAlphabet: string;
-  logo?: string;
-  website?: string;
-}
+interface IOwnerCompanySchema extends IOwnerCompany {}
 
-export default IOwnerCompany;
+export default IOwnerCompanySchema;

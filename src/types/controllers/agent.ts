@@ -12,6 +12,9 @@ interface IAgent {
   countryCodeAlphabet?: string;
   avatar?: string;
   password?: string;
+  agentCode: string;
+  isDeleted: boolean;
+  isActive: boolean;
   location: {
     type: string;
     coordinates: [number];

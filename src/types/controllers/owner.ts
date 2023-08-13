@@ -10,9 +10,12 @@ interface IOwner {
   countryCodeAlphabet: string;
   avatar?: string;
   password: string;
+  isDeleted: boolean;
+  isActive: boolean;
 }
 
-interface IOwnerSignupRequest extends IOwner {}
+interface IOwnerSignupRequest
+  extends unPick<IOwner, "isActive" | "isDeleted"> {}
 
 interface IOwnerProfile extends unPick<IOwner, "password"> {
   _id: ObjectId;

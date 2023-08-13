@@ -6,6 +6,8 @@ import ownerRouter from "./src/routes/owner";
 
 //mongodb connection
 import "./src/databases/mongo/connection";
+import agentRouter from "./src/routes/agent";
+import ownerCompanyRouter from "./src/routes/ownerCompany";
 
 const app: Express = express();
 
@@ -16,6 +18,8 @@ app.use(locale);
 
 // use routers
 app.use("/owners", ownerRouter);
+app.use("/agents", agentRouter);
+app.use("/companies", ownerCompanyRouter);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

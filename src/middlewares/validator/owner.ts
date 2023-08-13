@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Request } from "express";
 
 const ownerValidatorSchema = {
-  register: (req: Request) => {
+  signup: (req: Request) => {
     return z.object({
       body: z.object({
         name: z.string({

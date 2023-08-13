@@ -1,14 +1,14 @@
 import express from "express";
-import ownerController from "../../controllers/owners";
+import ownerController from "../../controllers/owner";
 import validate from "../../middlewares/validator";
-import ownerAuth from "../../middlewares/auth/owner";
 import ownerValidatorSchema from "../../middlewares/validator/owner";
+import { ownerAuth } from "../../middlewares/auth/owner";
 
 const ownerRouter = express.Router();
 
 ownerRouter.post(
   "/signup",
-  validate(ownerValidatorSchema.register),
+  validate(ownerValidatorSchema.signup),
   ownerController.signup,
 );
 

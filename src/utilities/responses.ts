@@ -48,6 +48,23 @@ const responses = {
     };
     return res.status(status).json(prepareResponse);
   },
+  notActive: async (
+    req: Request,
+    res: Response,
+    data: object,
+    module: string,
+  ) => {
+    const status: number = 403;
+    const prepareResponse: TResponse = {
+      message: req.t("DEACTIVATED_RESPONSE", module),
+      data,
+      error: false,
+      status,
+      success: false,
+      notFound: true,
+    };
+    return res.status(status).json(prepareResponse);
+  },
   authFail: async (req: Request, res: Response, data: object) => {
     const status: number = 401;
     const prepareResponse: TResponse = {

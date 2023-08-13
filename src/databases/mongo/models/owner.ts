@@ -13,6 +13,8 @@ const ownerSchema = new Schema<IOnwnerSchema>({
   country: { type: String, required: true },
   countryCodeAlphabet: { type: String, required: true },
   password: { type: String, required: true },
+  isDeleted: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 });
 
 ownerSchema.pre("save", function (next) {

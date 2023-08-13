@@ -7,7 +7,11 @@ const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
 const agentSchema = new Schema<IAgentSchema>({
   owner_id: { type: Schema.Types.ObjectId, required: true, ref: "Owner" },
-  company_id: { type: Schema.Types.ObjectId, required: true, ref: "Company" },
+  company_id: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "OwnerCompany",
+  },
   name: { type: String },
   email: { type: String },
   avatar: { type: String, default: "/assets/images/agent-avatar.png" },
@@ -17,6 +21,9 @@ const agentSchema = new Schema<IAgentSchema>({
   countryCodeAlphabet: { type: String },
   location: LocationSchema,
   password: { type: String },
+  agentCode: { type: String, required: true },
+  isDeleted: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 });
 
 agentSchema.pre("save", function (next) {
