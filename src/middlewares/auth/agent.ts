@@ -4,7 +4,7 @@ import responses from "../../utilities/responses";
 import { ObjectId } from "mongoose";
 import AgentModel from "../../databases/mongo/models/agent";
 import OwnerModel from "../../databases/mongo/models/owner";
-import OwnerCompanyModel from "../../databases/mongo/models/ownerCompany";
+import CompanyModel from "../../databases/mongo/models/company";
 
 const AgentAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 

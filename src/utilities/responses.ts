@@ -14,6 +14,23 @@ const responses = {
     };
     return res.status(status).json(prepareResponse);
   },
+  alreadyExists: async (
+    req: Request,
+    res: Response,
+    data: object,
+    module: string,
+  ) => {
+    const status: number = 409;
+    const prepareResponse: TResponse = {
+      message: req.t("ALREADY_EXISTS", { module }),
+      data,
+      error: true,
+      status,
+      success: false,
+      notFound: false,
+    };
+    return res.status(status).json(prepareResponse);
+  },
   success: async (
     req: Request,
     res: Response,
@@ -39,7 +56,7 @@ const responses = {
   ) => {
     const status: number = 404;
     const prepareResponse: TResponse = {
-      message: req.t("NOT_FOUND_RESPONSE", module),
+      message: req.t("NOT_FOUND_RESPONSE", { module }),
       data,
       error: false,
       status,
@@ -56,7 +73,7 @@ const responses = {
   ) => {
     const status: number = 403;
     const prepareResponse: TResponse = {
-      message: req.t("DEACTIVATED_RESPONSE", module),
+      message: req.t("DEACTIVATED_RESPONSE", { module }),
       data,
       error: false,
       status,

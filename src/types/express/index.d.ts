@@ -2,6 +2,8 @@ declare namespace Express {
   interface Request {
     agent: IAgentProfileWithoutPassword;
     owner: IOwnerProfileWithoutPassword;
-    ownerCompany: IOwnerCompany;
+    company: ICompany;
+    manager: IManagerProfile;
+    team: ITeamProfile;
   }
 }

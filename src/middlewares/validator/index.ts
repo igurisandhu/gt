@@ -13,6 +13,7 @@ const validate =
       });
       return next();
     } catch (error: any) {
+      console.log(error);
       const formatted = error.flatten();
 
       return responses.requestDataValidatorError(

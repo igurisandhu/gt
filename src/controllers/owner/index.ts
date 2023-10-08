@@ -4,18 +4,24 @@ import {
   IOwnerProfileWithAuth,
   IOwnerSignupRequest,
   IOwnerProfileWithOptionalPassword,
-  IOwnerProfile,
 } from "../../types/controllers/owner";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
-import { generateQRCode } from "../../utilities/qrcode";
-import { IOwnerCompanyProfile } from "../../types/controllers/ownerCompany";
 
 const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
 const signup = async (req: Request, res: Response) => {
   try {
-    const body: IOwnerSignupRequest = req.body;
+    let body: IOwnerSignupRequest = req.body;
+
+    body.email = body.email.toLowerCase();
+
+    //check if owner already registered
+    const check = await OwnerModel.findOne({ email: body.email });
+
+    if (check) {
+      return responses.alreadyExists(req, res, {}, "Owner account");
+    }
 
     const newOwner = new OwnerModel({ ...body });
 
@@ -46,7 +52,7 @@ const login = async (req: Request, res: Response) => {
   try {
     const { email, password }: { email: string; password: string } = req.body;
 
-    const owner = await OwnerModel.findOne({ email });
+    const owner = await OwnerModel.findOne({ email: email });
 
     if (!owner || owner.isDeleted == true) {
       return responses.notFound(req, res, {}, "Owner Account");
@@ -62,7 +68,7 @@ const login = async (req: Request, res: Response) => {
       return responses.authFail(req, res, {});
     }
 
-    const Authorization = jwt.sign({ ownerId: owner._id }, OwnerAuthSecert);
+    const Authorization = jwt.sign({ _id: owner._id }, OwnerAuthSecert);
 
     const ownerProfile: IOwnerProfileWithOptionalPassword = owner.toObject();
 

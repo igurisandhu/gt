@@ -7,9 +7,16 @@ import ownerRouter from "./src/routes/owner";
 //mongodb connection
 import "./src/databases/mongo/connection";
 import agentRouter from "./src/routes/agent";
-import ownerCompanyRouter from "./src/routes/ownerCompany";
+import companyRouter from "./src/routes/company";
+import cors from "cors";
 
 const app: Express = express();
+
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 
 app.use(express.json());
 
@@ -17,9 +24,11 @@ app.use(express.json());
 app.use(locale);
 
 // use routers
-app.use("/owners", ownerRouter);
-app.use("/agents", agentRouter);
-app.use("/companies", ownerCompanyRouter);
+app.use("/owner", ownerRouter);
+app.use("/agent", agentRouter);
+app.use("/company", companyRouter);
+
+app.use(express.static("public"));
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

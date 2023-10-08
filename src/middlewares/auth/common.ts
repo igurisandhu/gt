@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import responses from "../../utilities/responses";
 import OwnerModel from "../../databases/mongo/models/owner";
-import OwnerCompanyModel from "../../databases/mongo/models/ownerCompany";
+import CompanyModel from "../../databases/mongo/models/company";
+import jwt from "jsonwebtoken";
+import { ObjectId } from "mongoose";
+
+const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
 const checkOwnerAndCompanyStatus = async (
   req: Request,
@@ -20,19 +24,19 @@ const checkOwnerAndCompanyStatus = async (
       return responses.authFail(req, res, {});
     }
 
-    const ownerCompany = await OwnerCompanyModel.findById(company_id);
+    const company = await CompanyModel.findById(company_id);
 
     if (
-      !ownerCompany ||
-      ownerCompany.isActive == false ||
-      ownerCompany.isDeleted == true ||
-      ownerCompany.owner_id !== owner._id
+      !company ||
+      company.isActive == false ||
+      company.isDeleted == true ||
+      company.owner_id !== owner._id
     ) {
       return responses.authFail(req, res, {});
     }
 
     req.owner = owner;
-    req.ownerCompany = ownerCompany;
+    req.company = company;
 
     next();
   } catch (error) {
@@ -40,4 +44,48 @@ const checkOwnerAndCompanyStatus = async (
   }
 };
 
-export { checkOwnerAndCompanyStatus };
+const OwnerAndManagerAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!token) {
+      return responses.authFail(req, res, {});
+    }
+
+    const decoded = jwt.verify(token, OwnerAuthSecert) as { _id: ObjectId };
+
+    const owner = await OwnerModel.findById(decoded._id)
+      .select(["-password"])
+      .lean();
+
+    let manager;
+
+    if (owner) {
+      if (owner.isActive == false || owner.isDeleted == true) {
+        return responses.authFail(req, res, {});
+      }
+
+      req.owner = owner;
+    } else {
+      manager = await OwnerModel.findById(decoded._id)
+        .select(["-password"])
+        .lean();
+
+      if (!manager || manager.isActive == false || manager.isDeleted == true) {
+        return responses.authFail(req, res, {});
+      }
+
+      req.manager = manager;
+    }
+
+    next();
+  } catch (error) {
+    return responses.authFail(req, res, {});
+  }
+};
+
+export { checkOwnerAndCompanyStatus, OwnerAndManagerAuth };

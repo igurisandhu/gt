@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Request } from "express";
 
 const ownerValidatorSchema = {
-  signup: (req: Request) => {
+  addManager: (req: Request) => {
     return z.object({
       body: z.object({
         name: z.string({
@@ -135,6 +135,29 @@ const ownerValidatorSchema = {
             }),
           })
           .min(8, req.t("WORNG_PASSWORD_FORMAT")),
+      }),
+    }),
+  assignTeam: (req: Request) =>
+    z.object({
+      body: z.object({
+        team_id: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "team_id",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "team_id",
+            type: "string",
+          }),
+        }),
+        manager_id: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "manager_id",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "manager_id",
+            type: "string",
+          }),
+        }),
       }),
     }),
 };

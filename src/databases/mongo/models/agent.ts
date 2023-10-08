@@ -10,7 +10,7 @@ const agentSchema = new Schema<IAgentSchema>({
   company_id: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "OwnerCompany",
+    ref: "Company",
   },
   name: { type: String },
   email: { type: String },

@@ -4,6 +4,7 @@ import { unPick } from "../utilities/typescriptUtilities";
 interface IAgent {
   owner_id: ObjectId;
   company_id: ObjectId;
+  team_id: ObjectId;
   name?: string;
   email?: string;
   phone?: number;
