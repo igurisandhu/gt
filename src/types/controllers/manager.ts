@@ -1,5 +1,7 @@
 import { ObjectId } from "mongoose";
 import { unPick } from "../utilities/typescriptUtilities";
+import { ITeamProfile } from "./team";
+import { ICompanyProfile } from "./company";
 
 interface IManager {
   name: string;
@@ -23,13 +25,17 @@ interface IManagerProfile extends unPick<IManager, "password"> {
   _id: ObjectId;
 }
 
-interface IManagerProfileWithAuth extends IManagerProfile {
+interface IManagerProfileWithAuth
+  extends unPick<IManagerProfile, "company_id"> {
   Authorization: string;
   isManager: boolean;
+  company_id?: ICompanyProfile;
 }
 
-interface IManagerProfileWithOptionalPassword extends IManagerProfile {
+interface IManagerProfileWithOptionalPassword
+  extends unPick<IManagerProfile, "company_id"> {
   password?: string;
+  company_id?: ICompanyProfile;
 }
 
 interface IManagerLoginRequest extends Pick<IManager, "email" | "password"> {}
@@ -40,6 +46,10 @@ interface IManagerTeam {
   company_id: ObjectId;
 }
 
+interface IManagerTeamWithTeam extends unPick<IManagerTeam, "team_id"> {
+  team_id: ITeamProfile;
+}
+
 export {
   IManagerSignupRequest,
   IManager,
@@ -48,4 +58,5 @@ export {
   IManagerProfileWithOptionalPassword,
   IManagerLoginRequest,
   IManagerTeam,
+  IManagerTeamWithTeam,
 };

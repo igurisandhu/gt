@@ -140,15 +140,17 @@ const ownerValidatorSchema = {
   assignTeam: (req: Request) =>
     z.object({
       body: z.object({
-        team_id: z.string({
-          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "team_id",
-          }),
-          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "team_id",
-            type: "string",
-          }),
-        }),
+        teams: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "team_id",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "team_id",
+              type: "string",
+            }),
+          })
+          .array(),
         manager_id: z.string({
           required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
             key: "manager_id",

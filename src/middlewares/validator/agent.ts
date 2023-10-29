@@ -4,26 +4,7 @@ import { Request } from "express";
 const agentValidatorSchema = {
   addAgent: (req: Request) => {
     return z.object({
-      params: z.object({
-        owner_id: z.string({
-          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "owner_id",
-          }),
-          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "owner_id",
-            type: "string",
-          }),
-        }),
-        company_id: z.string({
-          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "company_id",
-          }),
-          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "company_id",
-            type: "string",
-          }),
-        }),
-      }),
+      params: z.object({}),
     });
   },
   login: (req: Request) =>

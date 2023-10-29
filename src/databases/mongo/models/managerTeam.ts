@@ -1,6 +1,7 @@
-import { Schema, model } from "mongoose";
+import { Model, Schema, model, Document } from "mongoose";
 import { IManagerTeam } from "../../../types/controllers/manager";
-import { IManagerTeamSchema } from "../../../types/models/manager";
+
+interface IModleManagerTeam extends Document, IManagerTeam {}
 
 const managerTeamSchema = new Schema<IManagerTeam>({
   manager_id: { type: Schema.Types.ObjectId, required: true, ref: "Manager" },
@@ -8,7 +9,7 @@ const managerTeamSchema = new Schema<IManagerTeam>({
   company_id: { type: Schema.Types.ObjectId, required: true, reqf: "Company" },
 });
 
-const ManagerTeamModel = model<IManagerTeamSchema>(
+const ManagerTeamModel = model<IModleManagerTeam>(
   "ManagerTeam",
   managerTeamSchema,
 );

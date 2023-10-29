@@ -1,11 +1,13 @@
-import mongoose, { Schema, model } from "mongoose";
-import IOnwnerSchema from "../../../types/models/manager";
+import mongoose, { Model, Schema, model, Document } from "mongoose";
+import IManagerSchema from "../../../types/models/manager";
 import bcrypt from "bcrypt";
 import CompanyModel from "./company";
 
+interface IModleManager extends Document, IManagerSchema {}
+
 const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
-const managerSchema = new Schema<IOnwnerSchema>({
+const managerSchema = new Schema<IManagerSchema>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   avatar: { type: String, default: "/assets/images/manager-avatar.png" },
@@ -50,6 +52,9 @@ managerSchema.methods.valifatePassword = async function (
   return bcrypt.compare(password, this.password);
 };
 
-const ManagerModel = model<IOnwnerSchema>("Manager", managerSchema);
+const ManagerModel: Model<IModleManager> = model<IModleManager>(
+  "Manager",
+  managerSchema,
+);
 
 export default ManagerModel;

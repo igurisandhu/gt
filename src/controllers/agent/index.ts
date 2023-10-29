@@ -4,6 +4,7 @@ import {
   IAgentProfile,
   IAgentProfileWithAuth,
   IAgentProfileWithOptionalPassword,
+  IAgentProfileWithTeamData,
 } from "../../types/controllers/agent";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
@@ -12,6 +13,9 @@ import { IManagerProfile } from "../../types/controllers/manager";
 import { ICompanyProfile } from "../../types/controllers/company";
 import { ITeamProfile } from "../../types/controllers/team";
 import { ObjectId } from "mongoose";
+import aggregateWithPaginationAndPopulate, {
+  IAggregateOptions,
+} from "../../databases/mongo/coommon";
 
 const AgentAuthSecert = process.env.AGENT_AUTH_SECERT || "GOD-IS-ALl";
 
@@ -21,38 +25,62 @@ const addAgent = async (req: Request, res: Response) => {
     const company: ICompanyProfile = req.company;
     const manager: IManagerProfile = req.manager;
 
-    const genrateRandomCode = () => Math.floor(Math.random() * 90000) + 10000;
+    const data = req.body;
 
-    let agentCode: number = genrateRandomCode();
+    let agent: IAgentProfileWithOptionalPassword;
 
-    const checkAgentCode = async (code: number) => {
-      const isAgent = await AgentModel.findOne({
+    if (data.password) {
+    }
+
+    if (!data._id) {
+      const check = await AgentModel.findOne({ email: data.email });
+
+      if (check) {
+        return responses.alreadyExists(req, res, {}, "Agent");
+      }
+
+      const genrateRandomCode = () => Math.floor(Math.random() * 90000) + 10000;
+
+      let agentCode: number = genrateRandomCode();
+
+      const checkAgentCode = async (code: number) => {
+        const isAgent = await AgentModel.findOne({
+          agentCode: `${company.name.slice(0, 2)}${company.name.slice(
+            -2,
+          )}${code}`,
+        }).lean();
+        if (!isAgent) {
+          return true;
+        } else {
+          agentCode = genrateRandomCode();
+          checkAgentCode(agentCode);
+        }
+      };
+
+      checkAgentCode(agentCode);
+
+      const newAgent = new AgentModel({
+        owner_id: manager ? manager.owner_id : owner._id,
+        company_id: company._id,
         agentCode: `${company.name.slice(0, 2)}${company.name.slice(
           -2,
-        )}${code}`,
-      }).lean();
-      if (!isAgent) {
-        return true;
-      } else {
-        agentCode = genrateRandomCode();
-        checkAgentCode(agentCode);
+        )}${agentCode}`,
+        ...data,
+      });
+
+      const newSavedAgent = await newAgent.save();
+
+      agent = newSavedAgent.toObject();
+    } else {
+      let updatedAgent = await AgentModel.findOneAndUpdate(
+        { _id: data._id },
+        { ...data },
+      );
+      if (!updatedAgent) {
+        return responses.notFound(req, res, {}, "Agent");
       }
-    };
-
-    checkAgentCode(agentCode);
-
-    const newAgent = new AgentModel({
-      owner_id: manager ? manager.owner_id : owner._id,
-      company_id: company._id,
-      agentCode: `${company.name.slice(0, 2)}${company.name.slice(
-        -2,
-      )}${agentCode}`,
-    });
-
-    const newSavedAgent = await newAgent.save();
-
-    const agent: IAgentProfileWithOptionalPassword = newSavedAgent.toObject();
-    // await AgentModel.findById(newSavedAgent._id).select(['-password']).lean()
+      agent = updatedAgent;
+    }
     delete agent.password;
 
     if (!agent) {
@@ -113,14 +141,15 @@ const getAgent = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
     const manager: IManagerProfile = req.manager;
-    let company: ICompanyProfile = req.company;
+    const company: ICompanyProfile = req.company;
     const team: ITeamProfile = req.team;
 
-    const agent_id = req.query;
+    const { agent_id } = req.query;
 
     let data: [] | {} = [];
+    let total: number = 0;
     if (agent_id) {
-      let agent: IAgentProfile | null = null;
+      let agent: IAgentProfileWithTeamData | null = null;
 
       if (owner) {
         agent = await AgentModel.findOne({
@@ -129,6 +158,7 @@ const getAgent = async (req: Request, res: Response) => {
           company_id: company._id,
         })
           .select(["-password"])
+          .populate("team_id")
           .lean();
       }
 
@@ -137,7 +167,10 @@ const getAgent = async (req: Request, res: Response) => {
           _id: agent_id,
           owner_id: manager.owner_id,
           company_id: company._id,
-        });
+        })
+          .select(["-password"])
+          .populate("team_id")
+          .lean();
       }
 
       if (!agent) {
@@ -145,33 +178,56 @@ const getAgent = async (req: Request, res: Response) => {
       }
 
       data = agent;
+      total = 1;
     } else {
       const {
-        limit = 10,
-        page = 1,
+        limit = "10",
+        page = "1",
         name,
+        sort,
+        email,
+        isActive,
       }: {
-        limit: number;
-        page: number;
-        name: string;
-      } = req.body;
+        limit?: string;
+        page?: string;
+        name?: string;
+        sort?: string;
+        email?: string;
+        isActive?: string;
+      } = req.query;
 
       let searchQuery: {
         owner_id?: ObjectId;
-        name?: {
-          $search: string;
-        };
         team_id?: ObjectId;
         company_id: ObjectId;
+        isActive?: boolean;
+        name?: {
+          $regex: string;
+          $options?: string;
+        };
+        email?: {
+          $regex: string;
+          $options?: string;
+        };
       } = {
-        owner_id: owner._id,
         company_id: company._id,
       };
+
+      if (isActive) {
+        searchQuery.isActive = isActive == "true" ? true : false;
+      }
 
       if (name) {
         searchQuery = {
           ...searchQuery,
-          name: { $search: name },
+          name: { $regex: name, $options: "i" },
+        };
+      }
+
+      if (email) {
+        searchQuery = {
+          ...searchQuery,
+          email: { $regex: email, $options: "i" },
         };
       }
 
@@ -187,16 +243,38 @@ const getAgent = async (req: Request, res: Response) => {
         searchQuery.owner_id = manager.owner_id;
       }
 
-      const agents: [IAgentProfile] | [] = await AgentModel.find(searchQuery)
-        .select(["-password"])
-        .limit(limit)
-        .skip((page - 1) * 10)
-        .lean();
-      data = agents;
+      let AggregateOptions: IAggregateOptions = {
+        page: Number(page),
+        perPage: Number(limit),
+      };
+
+      if (sort) {
+        AggregateOptions.sort = { name: Number(sort) };
+      }
+
+      AggregateOptions.lookups = [
+        {
+          from: "teams",
+          localField: "team_id",
+          foreignField: "_id",
+          as: "team",
+        },
+      ];
+
+      AggregateOptions.unwind = ["team"];
+
+      const result = await aggregateWithPaginationAndPopulate(
+        AgentModel,
+        searchQuery,
+        AggregateOptions,
+      );
+      data = result.data;
+      total = result.total;
     }
 
     return responses.success(req, res, data);
   } catch (error) {
+    console.log(error);
     return responses.serverError(req, res, {});
   }
 };

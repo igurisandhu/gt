@@ -11,7 +11,12 @@ import { ownerAuth } from "../../middlewares/auth/owner";
 
 const agentRouter = express.Router();
 
-agentRouter.get("/", ownerAuth, agentController.getAgent);
+agentRouter.get(
+  "/",
+  OwnerAndManagerAuth,
+  companyAuth,
+  agentController.getAgent,
+);
 
 agentRouter.post(
   "/add",

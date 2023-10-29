@@ -8,7 +8,9 @@ import ownerRouter from "./src/routes/owner";
 import "./src/databases/mongo/connection";
 import agentRouter from "./src/routes/agent";
 import companyRouter from "./src/routes/company";
+import teamRouter from "./src/routes/team";
 import cors from "cors";
+import managerRouter from "./src/routes/manager";
 
 const app: Express = express();
 
@@ -27,6 +29,8 @@ app.use(locale);
 app.use("/owner", ownerRouter);
 app.use("/agent", agentRouter);
 app.use("/company", companyRouter);
+app.use("/team", teamRouter);
+app.use("/manager", managerRouter);
 
 app.use(express.static("public"));
 

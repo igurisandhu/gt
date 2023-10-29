@@ -5,6 +5,7 @@ interface TResponse {
   success: boolean;
   error: boolean;
   notFound: boolean;
+  total?: number;
 }
 
 export { TResponse };

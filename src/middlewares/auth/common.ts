@@ -4,6 +4,7 @@ import OwnerModel from "../../databases/mongo/models/owner";
 import CompanyModel from "../../databases/mongo/models/company";
 import jwt from "jsonwebtoken";
 import { ObjectId } from "mongoose";
+import ManagerModel from "../../databases/mongo/models/manager";
 
 const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
@@ -71,7 +72,7 @@ const OwnerAndManagerAuth = async (
 
       req.owner = owner;
     } else {
-      manager = await OwnerModel.findById(decoded._id)
+      manager = await ManagerModel.findById(decoded._id)
         .select(["-password"])
         .lean();
 

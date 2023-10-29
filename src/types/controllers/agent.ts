@@ -1,5 +1,6 @@
 import { ObjectId } from "mongoose";
 import { unPick } from "../utilities/typescriptUtilities";
+import { ITeamProfile } from "./team";
 
 interface IAgent {
   owner_id: ObjectId;
@@ -18,7 +19,7 @@ interface IAgent {
   isActive: boolean;
   location: {
     type: string;
-    coordinates: [number];
+    coordinates: number[];
   };
 }
 
@@ -26,6 +27,12 @@ interface IAgentSignupRequest extends IAgent {}
 
 interface IAgentProfile extends unPick<IAgent, "password"> {
   _id: ObjectId;
+}
+
+interface IAgentProfileWithTeamData
+  extends unPick<IAgent, "password" | "team_id"> {
+  _id: ObjectId;
+  team_id: ITeamProfile;
 }
 
 interface IAgentProfileWithAuth extends IAgentProfile {
@@ -45,4 +52,5 @@ export {
   IAgentProfileWithAuth,
   IAgentProfileWithOptionalPassword,
   IAgentLoginRequest,
+  IAgentProfileWithTeamData,
 };

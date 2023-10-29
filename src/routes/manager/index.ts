@@ -5,11 +5,14 @@ import managerValidatorSchema from "../../middlewares/validator/manager";
 import { ownerAuth } from "../../middlewares/auth/owner";
 import { companyAuth } from "../../middlewares/auth/company";
 import { teamAuth } from "../../middlewares/auth/team";
+import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
 
 const managerRouter = express.Router();
 
+managerRouter.get("/", ownerAuth, companyAuth, managerController.getManager);
+
 managerRouter.post(
-  "/addManager",
+  "/add",
   validate(managerValidatorSchema.addManager),
   ownerAuth,
   companyAuth,
@@ -17,11 +20,10 @@ managerRouter.post(
 );
 
 managerRouter.post(
-  "/assignteam",
+  "/assign-team",
   validate(managerValidatorSchema.assignTeam),
   ownerAuth,
   companyAuth,
-  teamAuth,
   managerController.assignTeam,
 );
 

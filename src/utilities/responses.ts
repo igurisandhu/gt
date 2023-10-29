@@ -35,6 +35,7 @@ const responses = {
     req: Request,
     res: Response,
     data: object,
+    total: number = 0,
     successMessage?: string,
   ) => {
     const status: number = 200;
@@ -45,6 +46,7 @@ const responses = {
       status,
       success: true,
       notFound: false,
+      total,
     };
     return res.status(status).json(prepareResponse);
   },

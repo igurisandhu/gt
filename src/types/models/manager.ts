@@ -2,7 +2,6 @@ import { ObjectId } from "mongoose";
 import { IManager, IManagerTeam } from "../controllers/manager";
 
 export interface IManagerSchema extends IManager {
-  _id: ObjectId;
   valifatePassword(password: string): Promise<boolean>;
 }
 
