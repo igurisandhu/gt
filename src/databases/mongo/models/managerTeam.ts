@@ -3,7 +3,7 @@ import { IManagerTeam } from "../../../types/controllers/manager";
 
 interface IModleManagerTeam extends Document, IManagerTeam {}
 
-const managerTeamSchema = new Schema<IManagerTeam>({
+const managerTeamSchema = new Schema<IModleManagerTeam>({
   manager_id: { type: Schema.Types.ObjectId, required: true, ref: "Manager" },
   team_id: { type: Schema.Types.ObjectId, required: true, ref: "Team" },
   company_id: { type: Schema.Types.ObjectId, required: true, reqf: "Company" },

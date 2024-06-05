@@ -11,8 +11,13 @@ import companyRouter from "./src/routes/company";
 import teamRouter from "./src/routes/team";
 import cors from "cors";
 import managerRouter from "./src/routes/manager";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import taskRouter from "./src/routes/task";
 
 const app: Express = express();
+
+const httpServer = createServer(app);
 
 app.use(
   cors({
@@ -31,10 +36,31 @@ app.use("/agent", agentRouter);
 app.use("/company", companyRouter);
 app.use("/team", teamRouter);
 app.use("/manager", managerRouter);
+app.use("/task", taskRouter);
 
 app.use(express.static("public"));
 
+// import { httpServer } from "../..";
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("getLocation", (msg) => {
+    console.log("message: " + msg);
+    io.emit("chat message", msg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+});
+
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.info(`✅ [Server]: Server is running at ${PORT}  ✅`);
 });

@@ -3,7 +3,7 @@ import ITeamSchema from "../../../types/models/team";
 
 interface IModleTeam extends Document, ITeamSchema {}
 
-const teamSchema = new Schema<ITeamSchema>({
+const teamSchema = new Schema<IModleTeam>({
   owner_id: { type: Schema.Types.ObjectId, required: true, ref: "Owner" },
   company_id: { type: Schema.Types.ObjectId, required: true, ref: "Company" },
   name: { type: String, required: true },

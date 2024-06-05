@@ -5,17 +5,13 @@ import {
   IManagerSignupRequest,
   IManagerProfileWithOptionalPassword,
   IManagerProfile,
-  IManagerTeam,
-  IManagerTeamWithTeam,
 } from "../../types/controllers/manager";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
 import { ICompanyProfile } from "../../types/controllers/company";
 import { IOwnerProfile } from "../../types/controllers/owner";
 import ManagerTeamModel from "../../databases/mongo/models/managerTeam";
-import mongoose, { ObjectId, isValidObjectId } from "mongoose";
-import TeamModel from "../../databases/mongo/models/team";
-import { ITeamProfile } from "../../types/controllers/team";
+import { ObjectId } from "mongoose";
 import aggregateWithPaginationAndPopulate, {
   IAggregateOptions,
 } from "../../databases/mongo/coommon";
@@ -269,11 +265,23 @@ const getManager = async (req: Request, res: Response) => {
   }
 };
 
+const deleteManager = async (req: Request, res: Response) => {
+  try {
+    const _id = req.params._id;
+
+    await ManagerModel.deleteOne({ _id: _id });
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const managerController = {
   addManager,
   login,
   assignTeam,
   getManager,
+  deleteManager,
 };
 
 export default managerController;

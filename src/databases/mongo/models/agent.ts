@@ -1,6 +1,5 @@
 import { Schema, model, Document, Model } from "mongoose";
 import bcrypt from "bcrypt";
-import LocationSchema from "./location";
 import IAgentSchema from "../../../types/models/agent";
 import { IAgent } from "../../../types/controllers/agent";
 
@@ -8,7 +7,7 @@ const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
 interface IModleAgent extends Document, IAgentSchema {}
 
-const agentSchema = new Schema<IAgentSchema>({
+const agentSchema = new Schema<IModleAgent>({
   owner_id: { type: Schema.Types.ObjectId, required: true, ref: "Owner" },
   company_id: {
     type: Schema.Types.ObjectId,

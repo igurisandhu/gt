@@ -1,9 +1,8 @@
 import { IOwnerProfile } from "../../types/controllers/owner";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
-import { ITeam, ITeamProfile } from "../../types/controllers/team";
-import TeamModel from "../../databases/mongo/models/team";
-import ManagerTeamModel from "../../databases/mongo/models/managerTeam";
+import { ITask, ITaskProfile } from "../../types/controllers/task";
+import TaskModel from "../../databases/mongo/models/task";
 import mongoose, { ObjectId } from "mongoose";
 
 import { IManagerProfile } from "../../types/controllers/manager";
@@ -12,70 +11,73 @@ import aggregateWithPaginationAndPopulate, {
   IAggregateOptions,
 } from "../../databases/mongo/coommon";
 
-const addTeam = async (req: Request, res: Response) => {
+const addTask = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
     const company: ICompanyProfile = req.company;
+    const manager: IManagerProfile = req.manager;
 
-    const teamData = req.body;
+    let taskData = req.body;
 
-    let team: ITeamProfile | null;
+    manager ? (taskData.manager_id = manager._id) : false;
 
-    if (teamData._id) {
-      team = await TeamModel.findByIdAndUpdate(
-        teamData._id,
-        { ...teamData, owner_id: owner._id, company_id: company._id },
+    let task: ITaskProfile | null;
+
+    if (taskData._id) {
+      task = await TaskModel.findByIdAndUpdate(
+        taskData._id,
+        { ...taskData, owner_id: owner._id, company_id: company._id },
         { new: true },
       ).lean();
     } else {
-      team = (
-        await TeamModel.create({
-          ...teamData,
+      task = (
+        await TaskModel.create({
+          ...taskData,
           owner_id: owner._id,
           company_id: company._id,
         })
       ).toObject();
     }
 
-    if (!team) {
+    if (!task) {
       return responses.serverError(req, res, {});
     }
 
-    return responses.success(req, res, team);
+    return responses.success(req, res, task);
   } catch (error) {
     return responses.serverError(req, res, {});
   }
 };
 
-const getTeam = async (req: Request, res: Response) => {
+const getTask = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
     const manager: IManagerProfile = req.manager;
     const company: ICompanyProfile = req.company;
 
-    const { team_id }: { team_id?: string } = req.query;
+    const { task_id }: { task_id?: string } = req.query;
 
     let data: [] | {} = [];
     let total: number = 0;
 
-    if (team_id) {
+    if (task_id) {
       let _id;
 
       try {
-        _id = new mongoose.Types.ObjectId(team_id);
+        _id = new mongoose.Types.ObjectId(task_id);
       } catch (error) {
         return responses.requestDataValidatorError(
           req,
           res,
           {},
-          req.t("INVALID", { module: "Team Id" }),
+          req.t("INVALID", { module: "Task Id" }),
         );
       }
 
-      let team: ITeamProfile | null = null;
+      let task: ITaskProfile | null = null;
 
       if (owner) {
-        team = await TeamModel.findOne({
+        task = await TaskModel.findOne({
           _id: _id,
           owner_id: owner._id,
           company_id: company._id,
@@ -83,35 +85,30 @@ const getTeam = async (req: Request, res: Response) => {
       }
 
       if (manager) {
-        const managerTeam = await ManagerTeamModel.findOne({
-          team_id: _id,
+        task = await TaskModel.findOne({
+          task_id: _id,
           manager_id: manager._id,
           company_id: company._id,
         });
-        if (managerTeam) {
-          team = await TeamModel.findById(managerTeam.team_id).lean();
-        }
       }
 
-      if (!team) {
-        return responses.notFound(req, res, {}, "Team");
+      if (!task) {
+        return responses.notFound(req, res, {}, "Task");
       }
 
-      data = team;
+      data = task;
       total = 1;
     } else {
       const {
         limit = "10",
         page = "1",
         name,
-        manager_id,
         sort,
         isActive,
       }: {
         limit?: string;
         page?: string;
         name?: string;
-        manager_id?: string;
         sort?: string;
         isActive?: string;
       } = req.query;
@@ -122,26 +119,18 @@ const getTeam = async (req: Request, res: Response) => {
           $options?: string;
         };
         owner_id?: ObjectId;
-        manager_id?: mongoose.Types.ObjectId;
+        manager_id?: ObjectId;
         company_id: ObjectId;
         isActive?: boolean;
       } = {
         company_id: company._id,
       };
-      if (manager_id) {
-        try {
-          searchQuery = {
-            ...searchQuery,
-            manager_id: new mongoose.Types.ObjectId(manager_id),
-          };
-        } catch (error) {
-          return responses.requestDataValidatorError(
-            req,
-            res,
-            {},
-            req.t("INVALID", { module: "Manager Id" }),
-          );
-        }
+
+      if (manager && manager._id) {
+        searchQuery = {
+          ...searchQuery,
+          manager_id: manager._id,
+        };
       }
 
       if (isActive) {
@@ -164,34 +153,31 @@ const getTeam = async (req: Request, res: Response) => {
         AggregateOptions.sort = { name: Number(sort) };
       }
 
-      if (owner && !manager_id) {
+      if (owner && !manager) {
         searchQuery.owner_id = owner._id;
         const result = await aggregateWithPaginationAndPopulate(
-          TeamModel,
+          TaskModel,
           searchQuery,
           AggregateOptions,
         );
         data = result.data;
         total = result.total;
-      } else if (manager || (manager_id && !manager)) {
-        if (manager)
-          searchQuery.manager_id = new mongoose.Types.ObjectId(
-            manager._id.toString(),
-          );
+      } else if (manager) {
+        searchQuery.manager_id = manager._id;
         AggregateOptions.lookups = [
           {
-            from: "teams",
-            localField: "team_id",
+            from: "tasks",
+            localField: "task_id",
             foreignField: "_id",
-            as: "team",
+            as: "task",
           },
         ];
         const result = await aggregateWithPaginationAndPopulate(
-          ManagerTeamModel,
+          TaskModel,
           searchQuery,
           AggregateOptions,
         );
-        data = result.data.map((managerTeam: any) => managerTeam?.team[0]);
+        data = result.data.map((managerTask: any) => managerTask?.task[0]);
         total = result.total;
       }
     }
@@ -203,21 +189,21 @@ const getTeam = async (req: Request, res: Response) => {
   }
 };
 
-const deleteTeam = async (req: Request, res: Response) => {
+const deleteTask = async (req: Request, res: Response) => {
   try {
     const _id = req.params._id;
 
-    await TeamModel.deleteOne({ _id: _id });
+    await TaskModel.deleteOne({ _id: _id });
     return responses.success(req, res, {});
   } catch (error) {
     return responses.serverError(req, res, {});
   }
 };
 
-const teamController = {
-  addTeam,
-  getTeam,
-  deleteTeam,
+const taskController = {
+  addTask,
+  getTask,
+  deleteTask,
 };
 
-export default teamController;
+export default taskController;

@@ -96,11 +96,62 @@ const addAgent = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
+    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
 
 const login = async (req: Request, res: Response) => {
+  try {
+    const {
+      email,
+      password,
+      owner_id,
+      company_id,
+    }: {
+      email: string;
+      password: string;
+      owner_id: string;
+      company_id: string;
+    } = req.body;
+
+    const agent = await AgentModel.findOne({
+      email,
+      // owner_id: owner_id,
+      // company_id: company_id,
+    });
+
+    if (!agent || agent.isDeleted == true) {
+      return responses.notFound(req, res, {}, "Agent Account");
+    }
+
+    if (!agent?.valifatePassword(password)) {
+      return responses.authFail(req, res, {});
+    }
+
+    if (agent.isActive == false) {
+      return responses.notActive(req, res, {}, "Agent Account");
+    }
+
+    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecert);
+
+    const agentProfile: IAgentProfileWithOptionalPassword = agent.toObject();
+
+    delete agentProfile.password;
+
+    const agentProfileWithAuth: IAgentProfileWithAuth = {
+      ...agentProfile,
+      Authorization,
+    };
+
+    return responses.success(req, res, agentProfileWithAuth);
+  } catch (error) {
+    console.log(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const loginWithQR = async (req: Request, res: Response) => {
   try {
     const { agentCode }: { agentCode: string } = req.body;
     const owner: IOwnerProfile = req.owner;
@@ -279,10 +330,43 @@ const getAgent = async (req: Request, res: Response) => {
   }
 };
 
+const updateLocation = async (req: Request, res: Response) => {
+  try {
+    const { agent_id, lat, long } = req.body;
+
+    console.log(updateLocation);
+
+    const agent = await AgentModel.updateOne(
+      { _id: agent_id },
+      { location: { type: "Point", coordinates: [lat, long] } },
+    );
+
+    console.log(agent);
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    console.log(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const deleteAgent = async (req: Request, res: Response) => {
+  try {
+    const _id = req.params._id;
+
+    await AgentModel.deleteOne({ _id: _id });
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const agentController = {
   addAgent,
   login,
   getAgent,
+  updateLocation,
+  deleteAgent,
 };
 
 export default agentController;

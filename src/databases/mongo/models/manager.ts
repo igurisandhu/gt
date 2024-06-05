@@ -2,12 +2,13 @@ import mongoose, { Model, Schema, model, Document } from "mongoose";
 import IManagerSchema from "../../../types/models/manager";
 import bcrypt from "bcrypt";
 import CompanyModel from "./company";
+import { IManager } from "../../../types/controllers/manager";
 
 interface IModleManager extends Document, IManagerSchema {}
 
 const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
-const managerSchema = new Schema<IManagerSchema>({
+const managerSchema = new Schema<IModleManager>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   avatar: { type: String, default: "/assets/images/manager-avatar.png" },
@@ -44,6 +45,28 @@ managerSchema.pre("save", function (next) {
       next();
     });
   });
+});
+
+managerSchema.pre("findOneAndUpdate", function (next) {
+  let manager = this.getUpdate() as IManager;
+
+  if (!manager) return next();
+  if (!manager.password) return next();
+
+  if (manager && manager.password) {
+    // generate a salt
+    bcrypt.genSalt(PASSWORD_SALT, function (err, salt) {
+      if (err) return next(err);
+
+      // hash the password using our new salt
+      bcrypt.hash(manager.password || "", salt, function (err, hash) {
+        if (err) return next(err);
+        // override the cleartext password with the hashed one
+        manager.password = hash;
+        next();
+      });
+    });
+  }
 });
 
 managerSchema.methods.valifatePassword = async function (

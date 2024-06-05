@@ -8,6 +8,7 @@ import {
 } from "../../middlewares/auth/common";
 import { companyAuth } from "../../middlewares/auth/company";
 import { ownerAuth } from "../../middlewares/auth/owner";
+import { teamAuth } from "../../middlewares/auth/team";
 
 const agentRouter = express.Router();
 
@@ -15,6 +16,7 @@ agentRouter.get(
   "/",
   OwnerAndManagerAuth,
   companyAuth,
+  teamAuth,
   agentController.getAgent,
 );
 
@@ -26,10 +28,19 @@ agentRouter.post(
   agentController.addAgent,
 );
 
+agentRouter.post("/update-location", agentController.updateLocation);
+
 agentRouter.post(
   "/login",
   validate(agentValidatorSchema.login),
   agentController.login,
+);
+
+agentRouter.delete(
+  "/:_id",
+  ownerAuth,
+  companyAuth,
+  agentController.deleteAgent,
 );
 
 export default agentRouter;

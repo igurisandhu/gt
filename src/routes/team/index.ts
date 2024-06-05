@@ -13,4 +13,6 @@ teamRouter.get("/", OwnerAndManagerAuth, companyAuth, teamController.getTeam);
 
 teamRouter.post("/add", ownerAuth, companyAuth, teamController.addTeam);
 
+teamRouter.delete("/:_id", ownerAuth, companyAuth, teamController.deleteTeam);
+
 export default teamRouter;

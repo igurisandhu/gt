@@ -7,7 +7,7 @@ const agentValidatorSchema = {
       params: z.object({}),
     });
   },
-  login: (req: Request) =>
+  loginWithQR: (req: Request) =>
     z.object({
       body: z.object({
         owner_id: z.string({
@@ -37,6 +37,38 @@ const agentValidatorSchema = {
             type: "string",
           }),
         }),
+      }),
+    }),
+  login: (req: Request) =>
+    z.object({
+      body: z.object({
+        email: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "email",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "email",
+            type: "string",
+          }),
+        }),
+        password: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "password",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "password",
+            type: "string",
+          }),
+        }),
+        // ownerPublicKey: z.string({
+        //   required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+        //     key: "ownerPublicKey",
+        //   }),
+        //   invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+        //     key: "ownerPublicKey",
+        //     type: "string",
+        //   }),
+        // }),
       }),
     }),
 };

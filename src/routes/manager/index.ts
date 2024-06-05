@@ -33,4 +33,11 @@ managerRouter.post(
   managerController.login,
 );
 
+managerRouter.delete(
+  "/:_id",
+  ownerAuth,
+  companyAuth,
+  managerController.deleteManager,
+);
+
 export default managerRouter;
