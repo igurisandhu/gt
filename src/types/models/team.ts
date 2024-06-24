@@ -1,5 +1,5 @@
 import { ITeam } from "../controllers/team";
 
-interface ITeamSchema extends ITeam {}
+type ITeamSchema = ITeam;
 
 export default ITeamSchema;

@@ -20,7 +20,7 @@ const ManagerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
 const addManager = async (req: Request, res: Response) => {
   try {
-    let body: IManagerSignupRequest = req.body;
+    const body: IManagerSignupRequest = req.body;
     const company: ICompanyProfile = req.company;
     const owner: IOwnerProfile = req.owner;
 
@@ -44,7 +44,7 @@ const addManager = async (req: Request, res: Response) => {
 
       manager = newSavedManager.toObject();
     } else {
-      let updatedManager: IManagerProfileWithOptionalPassword | null =
+      const updatedManager: IManagerProfileWithOptionalPassword | null =
         await ManagerModel.findOneAndUpdate(
           { _id: data._id },
           { ...data },
@@ -169,7 +169,7 @@ const getManager = async (req: Request, res: Response) => {
     const { manager_id } = req.query;
 
     let data: [] | {} = [];
-    let total: number = 0;
+    let total = 0;
 
     if (manager_id) {
       let manager: IManagerProfile | null = null;
@@ -240,7 +240,7 @@ const getManager = async (req: Request, res: Response) => {
         };
       }
 
-      let AggregateOptions: IAggregateOptions = {
+      const AggregateOptions: IAggregateOptions = {
         page: Number(page),
         perPage: Number(limit),
       };

@@ -17,7 +17,7 @@ const addTask = async (req: Request, res: Response) => {
     const company: ICompanyProfile = req.company;
     const manager: IManagerProfile = req.manager;
 
-    let taskData = req.body;
+    const taskData = req.body;
 
     manager ? (taskData.manager_id = manager._id) : false;
 
@@ -58,7 +58,7 @@ const getTask = async (req: Request, res: Response) => {
     const { task_id }: { task_id?: string } = req.query;
 
     let data: [] | {} = [];
-    let total: number = 0;
+    let total = 0;
 
     if (task_id) {
       let _id;
@@ -144,7 +144,7 @@ const getTask = async (req: Request, res: Response) => {
         };
       }
 
-      let AggregateOptions: IAggregateOptions = {
+      const AggregateOptions: IAggregateOptions = {
         page: Number(page),
         perPage: Number(limit),
       };

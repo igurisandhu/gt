@@ -18,8 +18,7 @@ interface IManager {
   company_id: ObjectId;
 }
 
-interface IManagerSignupRequest
-  extends unPick<IManager, "isActive" | "isDeleted"> {}
+type IManagerSignupRequest = unPick<IManager, "isActive" | "isDeleted">;
 
 interface IManagerProfile extends unPick<IManager, "password"> {
   _id: ObjectId;
@@ -38,7 +37,7 @@ interface IManagerProfileWithOptionalPassword
   company_id?: ICompanyProfile;
 }
 
-interface IManagerLoginRequest extends Pick<IManager, "email" | "password"> {}
+type IManagerLoginRequest = Pick<IManager, "email" | "password">;
 
 interface IManagerTeam {
   manager_id: ObjectId;

@@ -18,7 +18,8 @@ const ownerSchema = new Schema<IOnwnerSchema>({
 });
 
 ownerSchema.pre("save", function (next) {
-  let owner = this;
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const owner = this;
 
   // only hash the password if it has been modified (or is new)
   if (!owner.isModified("password")) return next();

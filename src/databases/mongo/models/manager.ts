@@ -28,7 +28,8 @@ const managerSchema = new Schema<IModleManager>({
 });
 
 managerSchema.pre("save", function (next) {
-  let manager = this;
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const manager = this;
 
   // only hash the password if it has been modified (or is new)
   if (!manager.isModified("password")) return next();
@@ -48,7 +49,7 @@ managerSchema.pre("save", function (next) {
 });
 
 managerSchema.pre("findOneAndUpdate", function (next) {
-  let manager = this.getUpdate() as IManager;
+  const manager = this.getUpdate() as IManager;
 
   if (!manager) return next();
   if (!manager.password) return next();

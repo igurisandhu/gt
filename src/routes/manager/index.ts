@@ -4,8 +4,6 @@ import validate from "../../middlewares/validator";
 import managerValidatorSchema from "../../middlewares/validator/manager";
 import { ownerAuth } from "../../middlewares/auth/owner";
 import { companyAuth } from "../../middlewares/auth/company";
-import { teamAuth } from "../../middlewares/auth/team";
-import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
 
 const managerRouter = express.Router();
 

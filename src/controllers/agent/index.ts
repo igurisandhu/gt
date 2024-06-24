@@ -72,7 +72,7 @@ const addAgent = async (req: Request, res: Response) => {
 
       agent = newSavedAgent.toObject();
     } else {
-      let updatedAgent = await AgentModel.findOneAndUpdate(
+      const updatedAgent = await AgentModel.findOneAndUpdate(
         { _id: data._id },
         { ...data },
       );
@@ -198,7 +198,7 @@ const getAgent = async (req: Request, res: Response) => {
     const { agent_id } = req.query;
 
     let data: [] | {} = [];
-    let total: number = 0;
+    let total = 0;
     if (agent_id) {
       let agent: IAgentProfileWithTeamData | null = null;
 
@@ -294,7 +294,7 @@ const getAgent = async (req: Request, res: Response) => {
         searchQuery.owner_id = manager.owner_id;
       }
 
-      let AggregateOptions: IAggregateOptions = {
+      const AggregateOptions: IAggregateOptions = {
         page: Number(page),
         perPage: Number(limit),
       };

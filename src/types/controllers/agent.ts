@@ -23,7 +23,7 @@ interface IAgent {
   };
 }
 
-interface IAgentSignupRequest extends IAgent {}
+type IAgentSignupRequest = IAgent;
 
 interface IAgentProfile extends unPick<IAgent, "password"> {
   _id: ObjectId;
@@ -43,7 +43,7 @@ interface IAgentProfileWithOptionalPassword extends IAgentProfile {
   password?: string;
 }
 
-interface IAgentLoginRequest extends Pick<IAgent, "email" | "password"> {}
+type IAgentLoginRequest = Pick<IAgent, "email" | "password">;
 
 export {
   IAgentSignupRequest,

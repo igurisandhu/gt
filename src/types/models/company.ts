@@ -1,5 +1,5 @@
 import { ICompany } from "../controllers/company";
 
-interface ICompanySchema extends ICompany {}
+type ICompanySchema = ICompany;
 
 export default ICompanySchema;

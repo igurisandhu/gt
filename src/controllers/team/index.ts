@@ -56,7 +56,7 @@ const getTeam = async (req: Request, res: Response) => {
     const { team_id }: { team_id?: string } = req.query;
 
     let data: [] | {} = [];
-    let total: number = 0;
+    let total = 0;
 
     if (team_id) {
       let _id;
@@ -155,7 +155,7 @@ const getTeam = async (req: Request, res: Response) => {
         };
       }
 
-      let AggregateOptions: IAggregateOptions = {
+      const AggregateOptions: IAggregateOptions = {
         page: Number(page),
         perPage: Number(limit),
       };

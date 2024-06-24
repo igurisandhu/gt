@@ -12,7 +12,7 @@ const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
 const signup = async (req: Request, res: Response) => {
   try {
-    let body: IOwnerSignupRequest = req.body;
+    const body: IOwnerSignupRequest = req.body;
 
     body.email = body.email.toLowerCase();
 

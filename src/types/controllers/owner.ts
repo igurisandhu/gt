@@ -14,8 +14,7 @@ interface IOwner {
   isActive: boolean;
 }
 
-interface IManagerSignupRequest
-  extends unPick<IOwner, "isActive" | "isDeleted"> {}
+type IManagerSignupRequest = unPick<IOwner, "isActive" | "isDeleted">;
 
 interface IOwnerProfile extends unPick<IOwner, "password"> {
   _id: ObjectId;
@@ -29,7 +28,7 @@ interface IOwnerProfileWithOptionalPassword extends IOwnerProfile {
   password?: string;
 }
 
-interface IOwnerLoginRequest extends Pick<IOwner, "email" | "password"> {}
+type IOwnerLoginRequest = Pick<IOwner, "email" | "password">;
 
 export {
   IOwnerSignupRequest,

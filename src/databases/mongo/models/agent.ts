@@ -46,7 +46,8 @@ const agentSchema = new Schema<IModleAgent>({
 });
 
 agentSchema.pre("save", function (next) {
-  let agent = this;
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const agent = this;
 
   // only hash the password if it has been modified (or is new)
   if (!agent.password) return next();
@@ -67,7 +68,7 @@ agentSchema.pre("save", function (next) {
 });
 
 agentSchema.pre("findOneAndUpdate", function (next) {
-  let agent = this.getUpdate() as IAgent;
+  const agent = this.getUpdate() as IAgent;
 
   if (!agent) return next();
   if (!agent.password) return next();

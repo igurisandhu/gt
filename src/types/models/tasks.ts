@@ -1,5 +1,5 @@
 import { ITask } from "../controllers/task";
 
-interface ITaskSchema extends ITask {}
+type ITaskSchema = ITask;
 
 export default ITaskSchema;
