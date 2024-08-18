@@ -198,7 +198,6 @@ const getTeam = async (req: Request, res: Response) => {
 
     return responses.success(req, res, data, total);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };

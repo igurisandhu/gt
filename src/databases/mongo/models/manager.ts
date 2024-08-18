@@ -3,6 +3,7 @@ import IManagerSchema from "../../../types/models/manager";
 import bcrypt from "bcrypt";
 import CompanyModel from "./company";
 import { IManager } from "../../../types/controllers/manager";
+import OwnerModel from "./owner";
 
 interface IModleManager extends Document, IManagerSchema {}
 
@@ -24,7 +25,28 @@ const managerSchema = new Schema<IModleManager>({
     required: true,
     ref: CompanyModel,
   },
-  owner_id: { type: mongoose.Types.ObjectId, required: true, ref: "owner" },
+  owner_id: { type: mongoose.Types.ObjectId, required: true, ref: OwnerModel },
+  permissions: {
+    type: Object,
+    required: true,
+    default: {
+      job: {
+        read: true,
+        write: false,
+        delete: false,
+      },
+      agent: {
+        read: true,
+        write: false,
+        delete: false,
+      },
+      manager: {
+        read: true,
+        write: false,
+        delete: false,
+      },
+    },
+  },
 });
 
 managerSchema.pre("save", function (next) {

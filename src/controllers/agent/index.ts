@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import AgentModel from "../../databases/mongo/models/agent";
 import {
-  IAgentProfile,
   IAgentProfileWithAuth,
   IAgentProfileWithOptionalPassword,
   IAgentProfileWithTeamData,
@@ -28,9 +27,6 @@ const addAgent = async (req: Request, res: Response) => {
     const data = req.body;
 
     let agent: IAgentProfileWithOptionalPassword;
-
-    if (data.password) {
-    }
 
     if (!data._id) {
       const check = await AgentModel.findOne({ email: data.email });
@@ -96,7 +92,6 @@ const addAgent = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -146,7 +141,6 @@ const login = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -206,17 +200,6 @@ const getAgent = async (req: Request, res: Response) => {
         agent = await AgentModel.findOne({
           _id: agent_id,
           owner_id: owner._id,
-          company_id: company._id,
-        })
-          .select(["-password"])
-          .populate("team_id")
-          .lean();
-      }
-
-      if (manager) {
-        agent = await AgentModel.findOne({
-          _id: agent_id,
-          owner_id: manager.owner_id,
           company_id: company._id,
         })
           .select(["-password"])
@@ -290,10 +273,6 @@ const getAgent = async (req: Request, res: Response) => {
         searchQuery.team_id = team._id;
       }
 
-      if (manager) {
-        searchQuery.owner_id = manager.owner_id;
-      }
-
       const AggregateOptions: IAggregateOptions = {
         page: Number(page),
         perPage: Number(limit),
@@ -325,7 +304,6 @@ const getAgent = async (req: Request, res: Response) => {
 
     return responses.success(req, res, data);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -334,18 +312,13 @@ const updateLocation = async (req: Request, res: Response) => {
   try {
     const { agent_id, lat, long } = req.body;
 
-    console.log(updateLocation);
-
     const agent = await AgentModel.updateOne(
       { _id: agent_id },
       { location: { type: "Point", coordinates: [lat, long] } },
     );
 
-    console.log(agent);
-
     return responses.success(req, res, {});
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };

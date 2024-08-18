@@ -81,15 +81,9 @@ const ownerValidatorSchema = {
             }),
             invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
               key: "avatar",
-              type: "url",
+              type: "string",
             }),
           })
-          .url(
-            req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "avatar",
-              type: "url",
-            }),
-          )
           .optional(),
         password: z
           .string({
@@ -101,7 +95,8 @@ const ownerValidatorSchema = {
               type: "string",
             }),
           })
-          .min(8, req.t("WORNG_PASSWORD_FORMAT")),
+          .min(8, req.t("WORNG_PASSWORD_FORMAT"))
+          .optional(),
       }),
     });
   },

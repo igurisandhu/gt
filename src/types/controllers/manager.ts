@@ -16,6 +16,7 @@ interface IManager {
   isActive: boolean;
   owner_id: ObjectId;
   company_id: ObjectId;
+  permissions: object;
 }
 
 type IManagerSignupRequest = unPick<IManager, "isActive" | "isDeleted">;

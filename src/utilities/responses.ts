@@ -3,7 +3,7 @@ import { TResponse } from "../types/utilities/responses";
 
 const responses = {
   serverError: async (req: Request, res: Response, data: object) => {
-    const status: number = 500;
+    const status = 500;
     const prepareResponse: TResponse = {
       message: req.t("SERVER_RESPONSE"),
       data,
@@ -20,7 +20,7 @@ const responses = {
     data: object,
     module: string,
   ) => {
-    const status: number = 409;
+    const status = 409;
     const prepareResponse: TResponse = {
       message: req.t("ALREADY_EXISTS", { module }),
       data,
@@ -35,10 +35,10 @@ const responses = {
     req: Request,
     res: Response,
     data: object,
-    total: number = 0,
+    total = 0,
     successMessage?: string,
   ) => {
-    const status: number = 200;
+    const status = 200;
     const prepareResponse: TResponse = {
       message: successMessage || req.t("SUCCESS_RESPONSE"),
       data,
@@ -56,7 +56,7 @@ const responses = {
     data: object,
     module: string,
   ) => {
-    const status: number = 404;
+    const status = 404;
     const prepareResponse: TResponse = {
       message: req.t("NOT_FOUND_RESPONSE", { module }),
       data,
@@ -73,7 +73,7 @@ const responses = {
     data: object,
     module: string,
   ) => {
-    const status: number = 403;
+    const status = 403;
     const prepareResponse: TResponse = {
       message: req.t("DEACTIVATED_RESPONSE", { module }),
       data,
@@ -85,7 +85,7 @@ const responses = {
     return res.status(status).json(prepareResponse);
   },
   authFail: async (req: Request, res: Response, data: object) => {
-    const status: number = 401;
+    const status = 401;
     const prepareResponse: TResponse = {
       message: req.t("AUTH_FAIL_RESPONSE"),
       data,
@@ -103,7 +103,7 @@ const responses = {
     key: string,
     correctType: string,
   ) => {
-    const status: number = 400;
+    const status = 400;
     const prepareResponse: TResponse = {
       message: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
         key,
@@ -123,7 +123,7 @@ const responses = {
     data: object,
     key: string,
   ) => {
-    const status: number = 400;
+    const status = 400;
     const prepareResponse: TResponse = {
       message: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", { key }),
       data,
@@ -141,7 +141,7 @@ const responses = {
     data: object,
     message?: string,
   ) => {
-    const status: number = 400;
+    const status = 400;
     const prepareResponse: TResponse = {
       message: message || req.t("INVALID_REQUEST_DATA_RESPONSE"),
       data,

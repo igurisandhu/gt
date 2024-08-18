@@ -18,6 +18,7 @@ const managerAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     const manager = await ManagerModel.findById(decoded._id)
       .select(["-password"])
+      .populate("owner_id")
       .lean();
 
     if (!manager || manager.isActive == false || manager.isDeleted == true) {
@@ -25,6 +26,7 @@ const managerAuth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     req.manager = manager;
+    req.owner = manager.owner_id;
 
     next();
   } catch (error) {

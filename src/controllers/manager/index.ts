@@ -114,7 +114,6 @@ const login = async (req: Request, res: Response) => {
 
     return responses.success(req, res, managerProfileWithAuth);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -156,7 +155,6 @@ const assignTeam = async (req: Request, res: Response) => {
     }
     return responses.success(req, res, {});
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -260,7 +258,6 @@ const getManager = async (req: Request, res: Response) => {
 
     return responses.success(req, res, data);
   } catch (error) {
-    console.log(error);
     return responses.serverError(req, res, {});
   }
 };

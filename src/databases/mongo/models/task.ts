@@ -13,19 +13,15 @@ import ITaskSchema from "../../../types/models/tasks";
 interface IModleTask extends Document, ITaskSchema {}
 
 const taskSchema = new Schema<IModleTask>({
-  company_id: { type: Schema.Types.ObjectId, required: true, ref: "Company" },
-  customer_id: { type: Schema.Types.ObjectId },
-  manager_id: { type: Schema.Types.ObjectId, required: true, ref: "Manager" },
-  admin_id: { type: Schema.Types.ObjectId, required: true, ref: "Owner" },
-  task_id: { type: Number, unique: true, required: true },
+  datetime: { type: Number, required: true },
   status: {
     type: Number,
     enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     required: true,
     default: 0,
   },
-  name: { type: String, required: true },
-  phone: { type: Number },
+  name: { type: String, required: true, default: "Task" },
+  phone: { type: Number, required: true },
   type: { type: Number, enum: [1, 2], required: true, default: 1 },
   address: { type: String },
   location: {
@@ -34,8 +30,6 @@ const taskSchema = new Schema<IModleTask>({
     },
     coordinates: [Number],
   },
-  isDeleted: { type: Boolean, default: false },
-  isActive: { type: Boolean, default: true },
 });
 
 const TaskModel: Model<IModleTask> = model<IModleTask>("Task", taskSchema);

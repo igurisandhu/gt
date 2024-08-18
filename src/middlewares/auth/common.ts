@@ -74,6 +74,7 @@ const OwnerAndManagerAuth = async (
     } else {
       manager = await ManagerModel.findById(decoded._id)
         .select(["-password"])
+        .populate("owner_id")
         .lean();
 
       if (!manager || manager.isActive == false || manager.isDeleted == true) {
@@ -81,6 +82,7 @@ const OwnerAndManagerAuth = async (
       }
 
       req.manager = manager;
+      req.owner = manager.owner_id;
     }
 
     next();

@@ -13,7 +13,8 @@ import cors from "cors";
 import managerRouter from "./src/routes/manager";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import taskRouter from "./src/routes/task";
+import jobRouter from "./src/routes/job";
+import commonRouter from "./src/routes/common";
 
 const app: Express = express();
 
@@ -36,7 +37,8 @@ app.use("/agent", agentRouter);
 app.use("/company", companyRouter);
 app.use("/team", teamRouter);
 app.use("/manager", managerRouter);
-app.use("/task", taskRouter);
+app.use("/job", jobRouter);
+app.use("/common", commonRouter);
 
 app.use(express.static("public"));
 
