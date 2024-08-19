@@ -17,4 +17,6 @@ companyRouter.get(
 
 companyRouter.post("/add", ownerAuth, companyController.addCompany);
 
+companyRouter.delete("/:_id", ownerAuth, companyController.deleteCompany);
+
 export default companyRouter;

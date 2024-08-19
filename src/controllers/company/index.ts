@@ -26,10 +26,18 @@ const addCompany = async (req: Request, res: Response) => {
     const owner: IOwnerProfile = req.owner;
 
     const companyData = req.body;
+    let company: ICompanyProfile | null;
 
-    const company: ICompanyProfile = (
-      await CompanyModel.create({ ...companyData, owner_id: owner._id })
-    ).toObject();
+    if (companyData._id) {
+      company = await CompanyModel.findByIdAndUpdate(companyData._id, {
+        ...companyData,
+        owner_id: owner._id,
+      }).lean();
+    } else {
+      company = (
+        await CompanyModel.create({ ...companyData, owner_id: owner._id })
+      ).toObject();
+    }
 
     if (!company) {
       return responses.serverError(req, res, {});
@@ -37,6 +45,7 @@ const addCompany = async (req: Request, res: Response) => {
 
     return responses.success(req, res, company);
   } catch (error) {
+    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -103,10 +112,22 @@ const getCompany = async (req: Request, res: Response) => {
   }
 };
 
+const deleteCompany = async (req: Request, res: Response) => {
+  try {
+    const _id = req.params._id;
+
+    await CompanyModel.deleteOne({ _id: _id });
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const companyController = {
   getqr,
   addCompany,
   getCompany,
+  deleteCompany,
 };
 
 export default companyController;
