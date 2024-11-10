@@ -85,9 +85,40 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
+const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const ownerId = req.params.id;
+    const updateData: Partial<IOwnerProfileWithOptionalPassword> = req.body;
+
+    // Remove sensitive fields that shouldn't be updated directly
+    delete updateData.password;
+    delete updateData.isActive;
+    delete updateData.isDeleted;
+
+    const updatedOwner = await OwnerModel.findByIdAndUpdate(
+      ownerId,
+      { $set: updateData },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedOwner) {
+      return responses.notFound(req, res, {}, "Owner not found");
+    }
+
+    const ownerProfile: IOwnerProfileWithAuth = updatedOwner.toObject();
+    // delete ownerProfile.password;
+
+    return responses.success(req, res, { owner: ownerProfile });
+  } catch (error) {
+    console.error("Error updating owner profile:", error);
+    return responses.serverError(req, res, {});
+  }
+};
+
 const ownerController = {
   signup,
   login,
+  updateProfile,
 };
 
 export default ownerController;

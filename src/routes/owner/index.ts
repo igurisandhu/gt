@@ -18,4 +18,11 @@ ownerRouter.post(
   ownerController.login,
 );
 
+ownerRouter.put(
+  "/profile/:id",
+  ownerAuth,
+  validate(ownerValidatorSchema.updateProfile),
+  ownerController.updateProfile,
+);
+
 export default ownerRouter;

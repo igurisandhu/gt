@@ -137,6 +137,67 @@ const ownerValidatorSchema = {
           .min(8, req.t("WORNG_PASSWORD_FORMAT")),
       }),
     }),
+  updateProfile: (req: Request) => {
+    return z.object({
+      body: z.object({
+        name: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "name",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "name",
+            type: "string",
+          }),
+        }),
+        email: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+              type: "string",
+            }),
+          })
+          .email(
+            req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+              type: "string",
+            }),
+          ),
+        mobile: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "mobile",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "mobile",
+              type: "string",
+            }),
+          })
+          .min(10, req.t("INVALID_REQUEST_PARAM_VALUE", { key: "mobile" }))
+          .max(10, req.t("INVALID_REQUEST_PARAM_VALUE", { key: "mobile" })),
+        companyName: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "companyName",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "companyName",
+            type: "string",
+          }),
+        }),
+        image: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "image",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "image",
+            type: "string",
+          }),
+        }),
+      }),
+    });
+  },
 };
 
 export default ownerValidatorSchema;

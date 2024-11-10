@@ -92,6 +92,7 @@ const addAgent = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
+    console.log(error);
     return responses.serverError(req, res, {});
   }
 };

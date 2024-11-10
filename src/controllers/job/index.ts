@@ -66,11 +66,13 @@ const addJob = async (req: Request, res: Response) => {
       return responses.success(req, res, { ...job, tasks: taskResults });
     } catch (jobError) {
       // If creating the job fails, delete the created tasks
+      console.log(jobError);
       await TaskModel.deleteMany({ _id: { $in: taskIds } });
 
       return responses.serverError(req, res, {});
     }
   } catch (error) {
+    console.log(error);
     return responses.serverError(req, res, {});
   }
 };
