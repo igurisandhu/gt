@@ -25,4 +25,15 @@ ownerRouter.put(
   ownerController.updateProfile,
 );
 
+ownerRouter.put("/change-password", ownerAuth, ownerController.changePassword);
+ownerRouter.get("/profile", ownerAuth, ownerController.getProfile);
+ownerRouter.put("/forgot-password", ownerController.forgotPassword);
+ownerRouter.get("/verify-token", ownerController.verifyToken);
+ownerRouter.put(
+  "/change-forgot-password",
+  ownerController.changeForgotPassword,
+);
+ownerRouter.post("/send-otp", ownerController.sendPhoneOTP);
+ownerRouter.post("/login-with-otp", ownerController.loginWithPhoneOTP);
+
 export default ownerRouter;

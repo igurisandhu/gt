@@ -14,8 +14,6 @@ interface IOwner {
   isActive: boolean;
 }
 
-type IManagerSignupRequest = unPick<IOwner, "isActive" | "isDeleted">;
-
 interface IOwnerProfile extends unPick<IOwner, "password"> {
   _id: ObjectId;
 }

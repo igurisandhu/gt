@@ -10,7 +10,7 @@ import { IManagerProfile } from "../../types/controllers/manager";
 import { ICompanyProfile } from "../../types/controllers/company";
 import aggregateWithPaginationAndPopulate, {
   IAggregateOptions,
-} from "../../databases/mongo/coommon";
+} from "../../databases/mongo/common";
 
 const addTeam = async (req: Request, res: Response) => {
   try {

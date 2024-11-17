@@ -14,9 +14,17 @@ import ManagerTeamModel from "../../databases/mongo/models/managerTeam";
 import { ObjectId } from "mongoose";
 import aggregateWithPaginationAndPopulate, {
   IAggregateOptions,
-} from "../../databases/mongo/coommon";
+} from "../../databases/mongo/common";
 
-const ManagerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
+import { sendMail } from "../../utilities/mail";
+import {
+  getRedisData,
+  setRedisData,
+  setRedisDataWithExpiry,
+} from "../../databases/redis";
+import { sendPhoneOTPUtility } from "../../utilities/sms";
+
+const ManagerAuthSecret = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
 
 const addManager = async (req: Request, res: Response) => {
   try {
@@ -62,7 +70,7 @@ const addManager = async (req: Request, res: Response) => {
 
     const Authorization = await jwt.sign(
       { _id: manager._id },
-      ManagerAuthSecert,
+      ManagerAuthSecret,
     );
 
     const managerProfileWithAuth: IManagerProfileWithAuth = {
@@ -99,7 +107,7 @@ const login = async (req: Request, res: Response) => {
       return responses.authFail(req, res, {});
     }
 
-    const Authorization = jwt.sign({ _id: manager._id }, ManagerAuthSecert);
+    const Authorization = jwt.sign({ _id: manager._id }, ManagerAuthSecret);
 
     const managerProfile: IManagerProfileWithOptionalPassword =
       manager.toObject();
@@ -273,12 +281,177 @@ const deleteManager = async (req: Request, res: Response) => {
   }
 };
 
+const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email }: { email: string } = req.body;
+
+    const manager = await ManagerModel.findOne({ email: email });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isDeleted == true) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isActive == false) {
+      return responses.notActive(req, res, {}, "Manager Account");
+    }
+
+    const token = jwt.sign(
+      { _id: manager._id, password: manager.password },
+      ManagerAuthSecret,
+      {
+        expiresIn: "1d",
+      },
+    );
+
+    const resetPasswordUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
+    //send email with token
+
+    const message = `Click the link below to reset your password \n\n ${resetPasswordUrl}`;
+
+    await sendMail(email, "Reset Password", message);
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
+const verifyToken = async (req: Request, res: Response) => {
+  try {
+    const { token }: { token: string } = req.params as { token: string };
+
+    const decoded: any = jwt.verify(token, ManagerAuthSecret);
+
+    const manager = await ManagerModel.findOne({
+      _id: decoded._id,
+      password: decoded.password,
+    });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, password }: { token: string; password: string } = req.body;
+
+    const decoded: any = jwt.verify(token, ManagerAuthSecret);
+
+    const manager = await ManagerModel.findOne({
+      _id: decoded._id,
+      password: decoded.password,
+    });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    manager.password = password;
+    await manager.save();
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
+const sendPhoneOtp = async (req: Request, res: Response) => {
+  try {
+    const { phone }: { phone: string } = req.body;
+
+    const manager = await ManagerModel.findOne({ phone: phone });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isDeleted == true) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isActive == false) {
+      return responses.notActive(req, res, {}, "Manager Account");
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000);
+
+    //save otp in redis
+
+    await setRedisDataWithExpiry(phone, otp.toString(), 60 * 5);
+
+    //send otp to phone
+    await sendPhoneOTPUtility(phone);
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
+const loginWithPhoneOTP = async (req: Request, res: Response) => {
+  try {
+    const { phone, otp }: { phone: string; otp: number } = req.body;
+
+    const manager = await ManagerModel.findOne({ phone });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isDeleted == true) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    if (manager.isActive == false) {
+      return responses.notActive(req, res, {}, "Manager Account");
+    }
+
+    const savedOTP = await getRedisData(phone);
+
+    if (Number(savedOTP) !== otp) {
+      return responses.authFail(req, res, {});
+    }
+
+    const Authorization = jwt.sign({ _id: manager._id }, ManagerAuthSecret);
+
+    const managerProfile: IManagerProfileWithOptionalPassword =
+      manager.toObject();
+
+    delete managerProfile.password;
+
+    const managerProfileWithAuth: IManagerProfileWithAuth = {
+      ...managerProfile,
+      isManager: true,
+      Authorization,
+    };
+
+    return responses.success(req, res, managerProfileWithAuth);
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const managerController = {
   addManager,
   login,
   assignTeam,
   getManager,
   deleteManager,
+  forgotPassword,
+  verifyToken,
+  resetPassword,
+  sendPhoneOtp,
+  loginWithPhoneOTP,
 };
 
 export default managerController;

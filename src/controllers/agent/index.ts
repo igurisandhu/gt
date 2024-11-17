@@ -3,7 +3,6 @@ import AgentModel from "../../databases/mongo/models/agent";
 import {
   IAgentProfileWithAuth,
   IAgentProfileWithOptionalPassword,
-  IAgentProfileWithTeamData,
 } from "../../types/controllers/agent";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
@@ -14,32 +13,38 @@ import { ITeamProfile } from "../../types/controllers/team";
 import { ObjectId } from "mongoose";
 import aggregateWithPaginationAndPopulate, {
   IAggregateOptions,
-} from "../../databases/mongo/coommon";
+} from "../../databases/mongo/common";
+import { sendMail } from "../../utilities/mail";
+import { sendPhoneOTPUtility } from "../../utilities/sms";
+import {
+  deleteRedisData,
+  getRedisData,
+  setRedisDataWithExpiry,
+} from "../../databases/redis";
 
-const AgentAuthSecert = process.env.AGENT_AUTH_SECERT || "GOD-IS-ALl";
+const AgentAuthSecret = process.env.AGENT_AUTH_SECRET || "GOD-IS-ALL";
+
+const generateRandomCode = () => Math.floor(Math.random() * 90000) + 10000;
 
 const addAgent = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
     const company: ICompanyProfile = req.company;
     const manager: IManagerProfile = req.manager;
-
     const data = req.body;
 
     let agent: IAgentProfileWithOptionalPassword;
 
     if (!data._id) {
-      const check = await AgentModel.findOne({ email: data.email });
+      const existingAgent = await AgentModel.findOne({ email: data.email });
 
-      if (check) {
+      if (existingAgent) {
         return responses.alreadyExists(req, res, {}, "Agent");
       }
 
-      const genrateRandomCode = () => Math.floor(Math.random() * 90000) + 10000;
+      let agentCode = generateRandomCode();
 
-      let agentCode: number = genrateRandomCode();
-
-      const checkAgentCode = async (code: number) => {
+      const checkAgentCode: any = async (code: number) => {
         const isAgent = await AgentModel.findOne({
           agentCode: `${company.name.slice(0, 2)}${company.name.slice(
             -2,
@@ -48,12 +53,12 @@ const addAgent = async (req: Request, res: Response) => {
         if (!isAgent) {
           return true;
         } else {
-          agentCode = genrateRandomCode();
-          checkAgentCode(agentCode);
+          agentCode = generateRandomCode();
+          return checkAgentCode(agentCode);
         }
       };
 
-      checkAgentCode(agentCode);
+      await checkAgentCode(agentCode);
 
       const newAgent = new AgentModel({
         owner_id: manager ? manager.owner_id : owner._id,
@@ -65,25 +70,26 @@ const addAgent = async (req: Request, res: Response) => {
       });
 
       const newSavedAgent = await newAgent.save();
-
       agent = newSavedAgent.toObject();
     } else {
       const updatedAgent = await AgentModel.findOneAndUpdate(
         { _id: data._id },
         { ...data },
+        { new: true },
       );
       if (!updatedAgent) {
         return responses.notFound(req, res, {}, "Agent");
       }
-      agent = updatedAgent;
+      agent = updatedAgent.toObject();
     }
+
     delete agent.password;
 
     if (!agent) {
       return responses.serverError(req, res, {});
     }
 
-    const Authorization = await jwt.sign({ _id: agent._id }, AgentAuthSecert);
+    const Authorization = await jwt.sign({ _id: agent._id }, AgentAuthSecret);
 
     const agentProfileWithAuth: IAgentProfileWithAuth = {
       ...agent,
@@ -92,47 +98,32 @@ const addAgent = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return responses.serverError(req, res, {});
   }
 };
 
 const login = async (req: Request, res: Response) => {
   try {
-    const {
-      email,
-      password,
-      owner_id,
-      company_id,
-    }: {
-      email: string;
-      password: string;
-      owner_id: string;
-      company_id: string;
-    } = req.body;
+    const { email, password }: { email: string; password: string } = req.body;
 
-    const agent = await AgentModel.findOne({
-      email,
-      // owner_id: owner_id,
-      // company_id: company_id,
-    });
+    const agent = await AgentModel.findOne({ email });
 
-    if (!agent || agent.isDeleted == true) {
+    if (!agent || agent.isDeleted) {
       return responses.notFound(req, res, {}, "Agent Account");
     }
 
-    if (!agent?.valifatePassword(password)) {
+    if (!agent.validatePassword(password)) {
       return responses.authFail(req, res, {});
     }
 
-    if (agent.isActive == false) {
+    if (!agent.isActive) {
       return responses.notActive(req, res, {}, "Agent Account");
     }
 
-    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecert);
+    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecret);
 
     const agentProfile: IAgentProfileWithOptionalPassword = agent.toObject();
-
     delete agentProfile.password;
 
     const agentProfileWithAuth: IAgentProfileWithAuth = {
@@ -142,6 +133,124 @@ const login = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const loginWithPhonePassword = async (req: Request, res: Response) => {
+  try {
+    const { phone, password }: { phone: string; password: string } = req.body;
+
+    const agent = await AgentModel.findOne({ phone });
+
+    if (!agent || agent.isDeleted) {
+      return responses.notFound(req, res, {}, "Agent Account");
+    }
+
+    if (!agent.validatePassword(password)) {
+      return responses.authFail(req, res, {});
+    }
+
+    if (!agent.isActive) {
+      return responses.notActive(req, res, {}, "Agent Account");
+    }
+
+    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecret);
+
+    const agentProfile: IAgentProfileWithOptionalPassword = agent.toObject();
+    delete agentProfile.password;
+
+    const agentProfileWithAuth: IAgentProfileWithAuth = {
+      ...agentProfile,
+      Authorization,
+    };
+
+    return responses.success(req, res, agentProfileWithAuth);
+  } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const sendPhoneOTP = async (req: Request, res: Response) => {
+  try {
+    const { phone }: { phone: string } = req.body;
+
+    const agent = await AgentModel.findOne({ phone });
+
+    if (!agent || agent.isDeleted) {
+      return responses.notFound(req, res, {}, "Agent Account");
+    }
+
+    if (!agent.isActive) {
+      return responses.notActive(req, res, {}, "Agent Account");
+    }
+
+    const otp = await sendPhoneOTPUtility(phone);
+
+    return responses.success(req, res, { otp });
+  } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const loginWithPhoneOTP = async (req: Request, res: Response) => {
+  try {
+    const { phone, otp }: { phone: string; otp: number } = req.body;
+
+    const agent = await AgentModel.findOne({ phone });
+
+    if (!agent || agent.isDeleted) {
+      return responses.notFound(req, res, {}, "Agent Account");
+    }
+
+    if (!agent.isActive) {
+      return responses.notActive(req, res, {}, "Agent Account");
+    }
+
+    let attempts = await getRedisData(phone + "_fail");
+
+    if (!attempts) attempts = "0";
+
+    const savedOTP = await getRedisData(phone);
+
+    if (!savedOTP) {
+      return responses.authFail(req, res, { message: "OTP expired" });
+    }
+
+    if (Number(savedOTP) !== otp) {
+      if (Number(attempts) + 1 >= 3) {
+        await AgentModel.updateOne({ phone }, { isActive: false });
+        await deleteRedisData(phone + "_fail");
+        await deleteRedisData(phone);
+      } else {
+        await setRedisDataWithExpiry(
+          phone + "_fail",
+          Number(attempts) + 1,
+          3600,
+        );
+      }
+      return responses.authFail(req, res, { message: "Invalid OTP" });
+    }
+
+    await deleteRedisData(phone + "_fail");
+    await deleteRedisData(phone);
+
+    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecret);
+
+    const agentProfile: IAgentProfileWithOptionalPassword = agent.toObject();
+    delete agentProfile.password;
+
+    const agentProfileWithAuth: IAgentProfileWithAuth = {
+      ...agentProfile,
+      Authorization,
+    };
+
+    return responses.success(req, res, agentProfileWithAuth);
+  } catch (error) {
+    console.error(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -158,18 +267,17 @@ const loginWithQR = async (req: Request, res: Response) => {
       company_id: company._id,
     });
 
-    if (!agent || agent.isDeleted == true) {
+    if (!agent || agent.isDeleted) {
       return responses.notFound(req, res, {}, "Agent Account");
     }
 
-    if (agent.isActive == false) {
+    if (!agent.isActive) {
       return responses.notActive(req, res, {}, "Agent Account");
     }
 
-    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecert);
+    const Authorization = jwt.sign({ agentId: agent._id }, AgentAuthSecret);
 
     const agentProfile: IAgentProfileWithOptionalPassword = agent.toObject();
-
     delete agentProfile.password;
 
     const agentProfileWithAuth: IAgentProfileWithAuth = {
@@ -179,6 +287,7 @@ const loginWithQR = async (req: Request, res: Response) => {
 
     return responses.success(req, res, agentProfileWithAuth);
   } catch (error) {
+    console.error(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -186,27 +295,22 @@ const loginWithQR = async (req: Request, res: Response) => {
 const getAgent = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
-    const manager: IManagerProfile = req.manager;
     const company: ICompanyProfile = req.company;
     const team: ITeamProfile = req.team;
-
     const { agent_id } = req.query;
 
-    let data: [] | {} = [];
+    let data: [] | object = [];
     let total = 0;
-    if (agent_id) {
-      let agent: IAgentProfileWithTeamData | null = null;
 
-      if (owner) {
-        agent = await AgentModel.findOne({
-          _id: agent_id,
-          owner_id: owner._id,
-          company_id: company._id,
-        })
-          .select(["-password"])
-          .populate("team_id")
-          .lean();
-      }
+    if (agent_id) {
+      const agent = await AgentModel.findOne({
+        _id: agent_id,
+        owner_id: owner._id,
+        company_id: company._id,
+      })
+        .select(["-password"])
+        .populate("team_id")
+        .lean();
 
       if (!agent) {
         return responses.notFound(req, res, {}, "Agent");
@@ -231,7 +335,7 @@ const getAgent = async (req: Request, res: Response) => {
         isActive?: string;
       } = req.query;
 
-      let searchQuery: {
+      const searchQuery: {
         owner_id?: ObjectId;
         team_id?: ObjectId;
         company_id: ObjectId;
@@ -249,21 +353,15 @@ const getAgent = async (req: Request, res: Response) => {
       };
 
       if (isActive) {
-        searchQuery.isActive = isActive == "true" ? true : false;
+        searchQuery.isActive = isActive === "true";
       }
 
       if (name) {
-        searchQuery = {
-          ...searchQuery,
-          name: { $regex: name, $options: "i" },
-        };
+        searchQuery.name = { $regex: name, $options: "i" };
       }
 
       if (email) {
-        searchQuery = {
-          ...searchQuery,
-          email: { $regex: email, $options: "i" },
-        };
+        searchQuery.email = { $regex: email, $options: "i" };
       }
 
       if (owner) {
@@ -303,8 +401,9 @@ const getAgent = async (req: Request, res: Response) => {
       total = result.total;
     }
 
-    return responses.success(req, res, data);
+    return responses.success(req, res, data, total);
   } catch (error) {
+    console.error(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -313,13 +412,14 @@ const updateLocation = async (req: Request, res: Response) => {
   try {
     const { agent_id, lat, long } = req.body;
 
-    const agent = await AgentModel.updateOne(
+    await AgentModel.updateOne(
       { _id: agent_id },
       { location: { type: "Point", coordinates: [lat, long] } },
     );
 
     return responses.success(req, res, {});
   } catch (error) {
+    console.error(error);
     return responses.serverError(req, res, {});
   }
 };
@@ -328,9 +428,124 @@ const deleteAgent = async (req: Request, res: Response) => {
   try {
     const _id = req.params._id;
 
-    await AgentModel.deleteOne({ _id: _id });
+    await AgentModel.deleteOne({ _id });
     return responses.success(req, res, {});
   } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    let agent = req.agent;
+
+    agent = await AgentModel.find(agent._id);
+
+    if (!agent) {
+      return responses.notFound(req, res, {}, "Agent not found");
+    }
+
+    const isPasswordValid = await agent.validatePassword(oldPassword);
+
+    if (!isPasswordValid) {
+      return responses.authFail(req, res, {});
+    }
+
+    agent.password = newPassword;
+    await agent.save();
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    console.error("Error changing agent password:", error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    const agent = await AgentModel.findOne({ email });
+
+    if (!agent) {
+      return responses.notFound(req, res, {}, "Agent not found");
+    }
+
+    if (agent.isActive === false) {
+      return responses.notActive(req, res, {}, "Agent Account");
+    }
+
+    const resetToken = jwt.sign(
+      { _id: agent._id, password: agent.password },
+      AgentAuthSecret,
+      { expiresIn: "1h" },
+    );
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    await sendMail(
+      email,
+      "Password Reset",
+      `Click here to reset your password: ${resetLink}`,
+    );
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    console.error("Error forgot password:", error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const verifyResetToken = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+
+    const verify: any = jwt.verify(token, AgentAuthSecret);
+
+    if (!verify) {
+      return responses.notFound(req, res, {}, "Invalid token");
+    }
+
+    if (verify._id && verify.password) {
+      const agent = await AgentModel.findOne({
+        _id: verify._id,
+        password: verify.password,
+      });
+
+      if (!agent) {
+        return responses.notFound(req, res, {}, "Invalid token");
+      }
+    }
+
+    return responses.success(req, res, { isValid: true });
+  } catch (error) {
+    console.error("Error verifying reset token:", error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    const decoded: any = jwt.verify(token, AgentAuthSecret);
+
+    const agent = await AgentModel.findOne({
+      _id: decoded._id,
+      password: decoded.password,
+    });
+
+    if (!agent) {
+      return responses.notFound(req, res, {}, "Invalid token");
+    }
+
+    agent.password = newPassword;
+    await agent.save();
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    console.error("Error resetting password:", error);
     return responses.serverError(req, res, {});
   }
 };
@@ -341,6 +556,14 @@ const agentController = {
   getAgent,
   updateLocation,
   deleteAgent,
+  changePassword,
+  forgotPassword,
+  verifyResetToken,
+  resetPassword,
+  loginWithQR,
+  loginWithPhonePassword,
+  sendPhoneOTP,
+  loginWithPhoneOTP,
 };
 
 export default agentController;

@@ -12,6 +12,27 @@ import { teamAuth } from "../../middlewares/auth/team";
 
 const agentRouter = express.Router();
 
+/**
+ * @swagger
+ * /agent:
+ *   get:
+ *     summary: Get agent details
+ *     tags: [Agent]
+ *     responses:
+ *       200:
+ *         description: Agent details
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+
 agentRouter.get(
   "/",
   OwnerAndManagerAuth,
@@ -36,11 +57,39 @@ agentRouter.post(
   agentController.login,
 );
 
-agentRouter.delete(
-  "/:_id",
+agentRouter.delete("/:_id", companyAuth, agentController.deleteAgent);
+
+agentRouter.put(
+  "/change-password",
+  companyAuth,
+  agentController.changePassword,
+);
+
+agentRouter.put(
+  "/forgot-password",
+  companyAuth,
+  agentController.forgotPassword,
+);
+
+agentRouter.get(
+  "/verify-token",
   ownerAuth,
   companyAuth,
-  agentController.deleteAgent,
+  agentController.verifyResetToken,
+);
+
+agentRouter.put(
+  "/change-forgot-password",
+  companyAuth,
+  agentController.resetPassword,
+);
+
+agentRouter.post("/send-otp", agentController.sendPhoneOTP);
+
+agentRouter.post(
+  "/login-with-otp",
+  companyAuth,
+  agentController.loginWithPhoneOTP,
 );
 
 export default agentRouter;

@@ -12,9 +12,9 @@ import teamRouter from "./src/routes/team";
 import cors from "cors";
 import managerRouter from "./src/routes/manager";
 import { createServer } from "http";
-import { Server } from "socket.io";
 import jobRouter from "./src/routes/job";
 import commonRouter from "./src/routes/common";
+import swaggerSetup from "./src/swagger";
 
 const app: Express = express();
 
@@ -40,27 +40,10 @@ app.use("/manager", managerRouter);
 app.use("/job", jobRouter);
 app.use("/common", commonRouter);
 
+// use swagger
+swaggerSetup(app);
+
 app.use(express.static("public"));
-
-// import { httpServer } from "../..";
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("a user connected");
-
-  socket.on("getLocation", (msg) => {
-    console.log("message: " + msg);
-    io.emit("chat message", msg);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
 
 const PORT = process.env.PORT;
 httpServer.listen(PORT, () => {

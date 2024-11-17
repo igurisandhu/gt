@@ -5,9 +5,9 @@ import { IAgent } from "../../../types/controllers/agent";
 
 const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
-interface IModleAgent extends Document, IAgentSchema {}
+interface IModelAgent extends Document, IAgentSchema {}
 
-const agentSchema = new Schema<IModleAgent>({
+const agentSchema = new Schema<IModelAgent>({
   owner_id: { type: Schema.Types.ObjectId, required: true, ref: "Owner" },
   company_id: {
     type: Schema.Types.ObjectId,
@@ -89,12 +89,12 @@ agentSchema.pre("findOneAndUpdate", function (next) {
   }
 });
 
-agentSchema.methods.valifatePassword = async function (
+agentSchema.methods.validatePassword = async function (
   password: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, this.password);
 };
 
-const AgentModel: Model<IModleAgent> = model<IModleAgent>("Agent", agentSchema);
+const AgentModel: Model<IModelAgent> = model<IModelAgent>("Agent", agentSchema);
 
 export default AgentModel;

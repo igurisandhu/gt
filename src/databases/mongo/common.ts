@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Query } from "mongoose";
+import { Document, Model } from "mongoose";
 
 export interface IAggregateOptions {
   page?: number;

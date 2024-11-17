@@ -1,24 +1,17 @@
-import { IOwnerProfile } from "../../types/controllers/owner";
 import responses from "../../utilities/responses";
 import { Request, Response } from "express";
 import { IJob, ITaskProfile } from "../../types/controllers/task";
 import TaskModel from "../../databases/mongo/models/task";
-import mongoose, { ObjectId } from "mongoose";
+import { ObjectId } from "mongoose";
 
 import { IManagerProfile } from "../../types/controllers/manager";
 import { ICompanyProfile } from "../../types/controllers/company";
-import aggregateWithPaginationAndPopulate, {
-  IAggregateOptions,
-} from "../../databases/mongo/coommon";
-import { ITeamProfile } from "../../types/controllers/team";
 import JobModel from "../../databases/mongo/models/job";
 
 const addJob = async (req: Request, res: Response) => {
   try {
-    const owner: IOwnerProfile = req.owner;
     const company: ICompanyProfile = req.company;
     const manager: IManagerProfile = req.manager;
-    const team: ITeamProfile = req.team;
 
     const jobData = req.body;
     const tasks: ITaskProfile[] = jobData.task_id;
@@ -79,8 +72,6 @@ const addJob = async (req: Request, res: Response) => {
 
 const getJob = async (req: Request, res: Response) => {
   try {
-    const owner: IOwnerProfile = req.owner;
-    const manager: IManagerProfile = req.manager;
     const company: ICompanyProfile = req.company;
 
     let { _id } = req.query;

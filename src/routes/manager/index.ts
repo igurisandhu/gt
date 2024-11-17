@@ -9,6 +9,31 @@ const managerRouter = express.Router();
 
 managerRouter.get("/", ownerAuth, companyAuth, managerController.getManager);
 
+/**
+ * @swagger
+ * /manager/add:
+ *   post:
+ *     summary: Add a new manager
+ *     tags: [Manager]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Manager's email
+ *               password:
+ *                 type: string
+ *                 description: Manager's password
+ *     responses:
+ *       200:
+ *         description: Manager added successfully
+ *       400:
+ *         description: Bad request
+ */
 managerRouter.post(
   "/add",
   validate(managerValidatorSchema.addManager),
@@ -25,6 +50,31 @@ managerRouter.post(
   managerController.assignTeam,
 );
 
+/**
+ * @swagger
+ * /manager/login:
+ *   post:
+ *     summary: Login a manager
+ *     tags: [Manager]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Manager's email
+ *               password:
+ *                 type: string
+ *                 description: Manager's password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Unauthorized
+ */
 managerRouter.post(
   "/login",
   validate(managerValidatorSchema.login),

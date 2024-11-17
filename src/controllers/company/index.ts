@@ -6,6 +6,25 @@ import { ICompanyProfile } from "../../types/controllers/company";
 import CompanyModel from "../../databases/mongo/models/company";
 import { ObjectId } from "mongoose";
 
+//swagger defination
+
+/**
+ * @swagger
+ * /company/getqr:
+ *   get:
+ *     tags:
+ *       - Company
+ *     summary: Get QR code
+ *     description: Get QR code
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *       500:
+ *         description: Server error
+ */
+
 const getqr = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
@@ -56,7 +75,7 @@ const getCompany = async (req: Request, res: Response) => {
 
     const { company_id } = req.query;
 
-    let data: [] | {} = [];
+    let data: [] | object = [];
 
     if (company_id) {
       const company: ICompanyProfile | null = await CompanyModel.findOne({

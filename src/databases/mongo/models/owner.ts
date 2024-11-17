@@ -1,10 +1,10 @@
 import { Schema, model } from "mongoose";
-import IOnwnerSchema from "../../../types/models/owner";
+import IOwnerSchema from "../../../types/models/owner";
 import bcrypt from "bcrypt";
 
 const PASSWORD_SALT = Number(process.env.PASSWORD_SALT) || 10;
 
-const ownerSchema = new Schema<IOnwnerSchema>({
+const ownerSchema = new Schema<IOwnerSchema>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   avatar: { type: String, default: "/assets/images/owner-avatar.png" },
@@ -38,12 +38,12 @@ ownerSchema.pre("save", function (next) {
   });
 });
 
-ownerSchema.methods.valifatePassword = async function (
+ownerSchema.methods.validatePassword = async function (
   password: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, this.password);
 };
 
-const OwnerModel = model<IOnwnerSchema>("Owner", ownerSchema);
+const OwnerModel = model<IOwnerSchema>("Owner", ownerSchema);
 
 export default OwnerModel;
