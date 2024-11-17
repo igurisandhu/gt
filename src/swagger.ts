@@ -23,7 +23,6 @@ const options = {
 let specs: any;
 
 try {
-  console.log("Swagger options:", options);
   specs = swaggerJsdoc(options);
 } catch (error) {
   console.error("Error generating Swagger Docs", error);

@@ -33,7 +33,7 @@ ownerRouter.put(
   "/change-forgot-password",
   ownerController.changeForgotPassword,
 );
-ownerRouter.post("/send-otp", ownerController.sendPhoneOTP);
-ownerRouter.post("/login-with-otp", ownerController.loginWithPhoneOTP);
+ownerRouter.post("/send-phone-otp", ownerController.sendPhoneOTP);
+ownerRouter.post("/login-phone-otp", ownerController.loginWithPhoneOTP);
 
 export default ownerRouter;

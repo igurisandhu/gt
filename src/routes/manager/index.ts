@@ -9,31 +9,6 @@ const managerRouter = express.Router();
 
 managerRouter.get("/", ownerAuth, companyAuth, managerController.getManager);
 
-/**
- * @swagger
- * /manager/add:
- *   post:
- *     summary: Add a new manager
- *     tags: [Manager]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: Manager's email
- *               password:
- *                 type: string
- *                 description: Manager's password
- *     responses:
- *       200:
- *         description: Manager added successfully
- *       400:
- *         description: Bad request
- */
 managerRouter.post(
   "/add",
   validate(managerValidatorSchema.addManager),
@@ -50,31 +25,6 @@ managerRouter.post(
   managerController.assignTeam,
 );
 
-/**
- * @swagger
- * /manager/login:
- *   post:
- *     summary: Login a manager
- *     tags: [Manager]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: Manager's email
- *               password:
- *                 type: string
- *                 description: Manager's password
- *     responses:
- *       200:
- *         description: Login successful
- *       401:
- *         description: Unauthorized
- */
 managerRouter.post(
   "/login",
   validate(managerValidatorSchema.login),
@@ -87,5 +37,16 @@ managerRouter.delete(
   companyAuth,
   managerController.deleteManager,
 );
+
+managerRouter.put(
+  "/change-password",
+  ownerAuth,
+  managerController.changePassword,
+);
+managerRouter.put("/forgot-password", managerController.forgotPassword);
+managerRouter.get("/verify-token", managerController.verifyToken);
+managerRouter.put("/change-forgot-password", managerController.resetPassword);
+managerRouter.post("/send-phone-otp", managerController.sendPhoneOtp);
+managerRouter.post("/login-phone-otp", managerController.loginWithPhoneOTP);
 
 export default managerRouter;

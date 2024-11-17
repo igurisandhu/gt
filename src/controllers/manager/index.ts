@@ -441,6 +441,36 @@ const loginWithPhoneOTP = async (req: Request, res: Response) => {
   }
 };
 
+const changePassword = async (req: Request, res: Response) => {
+  try {
+    const {
+      oldPassword,
+      newPassword,
+    }: { oldPassword: string; newPassword: string } = req.body;
+
+    const manager = await ManagerModel.findOne({ _id: req.manager._id });
+
+    if (!manager) {
+      return responses.notFound(req, res, {}, "Manager Account");
+    }
+
+    const isPasswordValid: boolean = await manager.valifatePassword(
+      oldPassword,
+    );
+
+    if (!isPasswordValid) {
+      return responses.authFail(req, res, {});
+    }
+
+    manager.password = newPassword;
+    await manager.save();
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const managerController = {
   addManager,
   login,
@@ -452,6 +482,7 @@ const managerController = {
   resetPassword,
   sendPhoneOtp,
   loginWithPhoneOTP,
+  changePassword,
 };
 
 export default managerController;
