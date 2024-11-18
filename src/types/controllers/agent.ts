@@ -8,10 +8,9 @@ interface IAgent {
   team_id: ObjectId;
   name?: string;
   email?: string;
-  phone?: number;
-  phoneCountryCode?: number;
+  phone?: string;
   country?: string;
-  countryCodeAlphabet?: string;
+  countryCode?: string;
   avatar?: string;
   password?: string;
   agentCode: string;

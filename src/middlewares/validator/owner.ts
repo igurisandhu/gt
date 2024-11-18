@@ -165,13 +165,13 @@ const ownerValidatorSchema = {
               type: "string",
             }),
           ),
-        mobile: z
+        phone: z
           .string({
             required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "mobile",
+              key: "phone",
             }),
             invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "mobile",
+              key: "phone",
               type: "string",
             }),
           })

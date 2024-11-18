@@ -6,10 +6,9 @@ import { ICompanyProfile } from "./company";
 interface IManager {
   name: string;
   email: string;
-  phone: number;
-  phoneCountryCode?: number;
+  phone: string;
   country?: string;
-  countryCodeAlphabet?: string;
+  countryCode?: string;
   avatar?: string;
   password: string;
   isDeleted: boolean;

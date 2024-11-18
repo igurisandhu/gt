@@ -15,7 +15,6 @@ import { createServer } from "http";
 import jobRouter from "./src/routes/job";
 import commonRouter from "./src/routes/common";
 import swaggerSetup from "./src/swagger";
-
 const app: Express = express();
 
 const httpServer = createServer(app);

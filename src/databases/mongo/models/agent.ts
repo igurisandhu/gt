@@ -22,10 +22,9 @@ const agentSchema = new Schema<IModelAgent>({
   name: { type: String },
   email: { type: String },
   avatar: { type: String, default: "/assets/images/agent-avatar.png" },
-  phone: { type: Number },
-  phoneCountryCode: { type: Number },
+  phone: { type: String },
   country: { type: String },
-  countryCodeAlphabet: { type: String },
+  countryCode: { type: String },
   location: {
     type: {
       type: String,

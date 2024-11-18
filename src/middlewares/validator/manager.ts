@@ -30,13 +30,13 @@ const ownerValidatorSchema = {
               type: "string",
             }),
           ),
-        phone: z.number({
+        phone: z.string({
           required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
             key: "phone",
           }),
           invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
             key: "phone",
-            type: "number",
+            type: "string",
           }),
         }),
         // .min(5, req.t('INVALID_REQUEST_PARAM_VALUE', {key: 'phone'})).max(13, req.t('INVALID_REQUEST_PARAM_VALUE', {key: 'phone'})),

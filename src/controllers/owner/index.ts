@@ -16,50 +16,7 @@ import {
 import { sendPhoneOTPUtility } from "../../utilities/sms";
 
 const OwnerAuthSecert = process.env.OWNER_AUTH_SECERT || "GOD-IS-ALl";
-/**
- * @swagger
- * /owner/signup:
- *   post:
- *     summary: Create a new owner account
- *     tags:
- *       - Owner
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Owner's full name
- *               email:
- *                 type: string
- *                 description: Owner's email address
- *               phone:
- *                 type: string
- *                 description: Owner's phone number
- *               password:
- *                 type: string
- *                 description: Owner's password
- *             required:
- *               - name
- *               - email
- *               - phone
- *               - password
- *             example:
- *               name: John Doe
- *               email: john@example.com
- *               phone: "08012345678"
- *               password: "password123"
- *     responses:
- *       200:
- *         description: Owner account created successfully
- *       400:
- *         description: Owner account already exists
- *       500:
- *         description: Internal server error
- */
+
 const signup = async (req: Request, res: Response) => {
   try {
     const body: IOwnerSignupRequest = req.body;

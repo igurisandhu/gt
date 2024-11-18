@@ -29,6 +29,7 @@
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.2",
     "nodemailer": "^6.9.16",
+    "npm": "^10.9.0",
     "qrcode": "^1.5.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

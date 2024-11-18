@@ -4,10 +4,9 @@ import { unPick } from "../utilities/typescriptUtilities";
 interface IOwner {
   name: string;
   email: string;
-  phone: number;
-  phoneCountryCode?: number;
+  phone: string;
   country?: string;
-  countryCodeAlphabet?: string;
+  countryCode?: string;
   avatar?: string;
   password: string;
   isDeleted: boolean;

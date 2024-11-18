@@ -15,9 +15,49 @@ const options = {
         url: "http://localhost:3001", // Replace with your server URL
       },
     ],
+    components: {
+      parameters: {
+        companyId: {
+          in: "header",
+          name: "company_id",
+          schema: {
+            type: "string",
+          },
+          required: false,
+          description: "Optional company identifier",
+        },
+      },
+      securitySchemes: {
+        bearerAuth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+          description: "Enter your JWT token in the format: Bearer <token>",
+        },
+        apiKeyAuth: {
+          type: "apiKey",
+          name: "apikey",
+          in: "header",
+          description: "Enter your API key",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+        apiKeyAuth: [],
+      },
+      {
+        bearerAuth: [],
+      },
+      {
+        apiKeyAuth: [],
+      },
+      {},
+    ],
   },
   // Include all .ts files in the routes subfolders
-  apis: ["src/controllers/**/*.ts"],
+  apis: ["src/routes/**/*.ts"],
 };
 
 let specs: any;
