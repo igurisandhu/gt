@@ -52,7 +52,7 @@ managerRouter.get("/", ownerAuth, companyAuth, managerController.getManager);
  *                 example: "+1234567890"
  */
 managerRouter.post(
-  "/add",
+  "/",
   validate(managerValidatorSchema.addManager),
   ownerAuth,
   companyAuth,

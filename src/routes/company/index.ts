@@ -81,7 +81,7 @@ companyRouter.get(
  *               email: "newcompany@test.com"
  */
 companyRouter.post(
-  "/add",
+  "/",
   ownerAuth,
   validate(companyValidatorSchema.addCompany),
   companyController.addCompany,

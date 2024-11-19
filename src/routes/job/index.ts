@@ -67,12 +67,21 @@ jobRouter.get("/", OwnerAndManagerAuth, companyAuth, jobController.getJob);
  */
 
 jobRouter.post(
-  "/add",
+  "/",
   OwnerAndManagerAuth,
   companyAuth,
   teamAuth,
   validate(jobValidatorSchema.addJob),
   jobController.addJob,
+);
+
+jobRouter.put(
+  "/:_id",
+  OwnerAndManagerAuth,
+  companyAuth,
+  teamAuth,
+  validate(jobValidatorSchema.updateJob),
+  jobController.updateJob,
 );
 
 /**

@@ -61,7 +61,7 @@ teamRouter.get("/", OwnerAndManagerAuth, companyAuth, teamController.getTeam);
  *         description: Team created successfully
  */
 teamRouter.post(
-  "/add",
+  "/",
   validate(teamValidatorSchema.addTeam),
   ownerAuth,
   companyAuth,

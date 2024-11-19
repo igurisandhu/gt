@@ -57,11 +57,12 @@ const addJob = async (req: Request, res: Response) => {
 const updateJob = async (req: Request, res: Response) => {
   try {
     const jobData = req.body;
+    const job_id = req.params._id;
     const tasks: ITaskProfile[] = jobData.task_id;
 
     delete jobData.tasks;
 
-    const job = await JobModel.findById(jobData._id);
+    const job = await JobModel.findById(job_id).lean();
     if (!job) {
       return responses.notFound(req, res, {}, "Job");
     }
@@ -98,7 +99,7 @@ const getJob = async (req: Request, res: Response) => {
   try {
     const company: ICompanyProfile = req.company;
 
-    let { _id } = req.query;
+    const { _id }: { _id?: string } = req.query as { _id?: string };
 
     let data: IJob[] | IJob = [];
     let total = 0;

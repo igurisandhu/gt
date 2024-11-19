@@ -26,6 +26,50 @@ const AgentAuthSecret = process.env.AGENT_AUTH_SECRET || "GOD-IS-ALL";
 
 const generateRandomCode = () => Math.floor(Math.random() * 90000) + 10000;
 
+const signup = async (req: Request, res: Response) => {
+  try {
+    const {
+      email,
+      phone,
+      password,
+    }: { email: string; phone: string; password: string } = req.body;
+    const owner: IOwnerProfile = req.owner;
+    const company: ICompanyProfile = req.company;
+
+    const existingAgent = await AgentModel.findOne({ email: email });
+
+    if (existingAgent) {
+      return responses.alreadyExists(req, res, {}, "Agent");
+    }
+
+    const newAgent = new AgentModel({
+      email,
+      phone,
+      password,
+      owner_id: owner._id,
+      company_id: company._id,
+      isActive: true,
+      isDeleted: false,
+    });
+
+    const newSavedAgent = await newAgent.save();
+    const agent = newSavedAgent.toObject();
+    delete agent.password;
+
+    const Authorization = await jwt.sign({ _id: agent._id }, AgentAuthSecret);
+
+    const agentProfileWithAuth: IAgentProfileWithAuth = {
+      ...agent,
+      Authorization,
+    };
+
+    return responses.success(req, res, agentProfileWithAuth);
+  } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
 const addAgent = async (req: Request, res: Response) => {
   try {
     const owner: IOwnerProfile = req.owner;
@@ -33,61 +77,77 @@ const addAgent = async (req: Request, res: Response) => {
     const manager: IManagerProfile = req.manager;
     const data = req.body;
 
-    let agent: IAgentProfileWithOptionalPassword;
+    const existingAgent = await AgentModel.findOne({ email: data.email });
 
-    if (!data._id) {
-      const existingAgent = await AgentModel.findOne({ email: data.email });
+    if (existingAgent) {
+      return responses.alreadyExists(req, res, {}, "Agent");
+    }
 
-      if (existingAgent) {
-        return responses.alreadyExists(req, res, {}, "Agent");
-      }
+    let agentCode = generateRandomCode();
 
-      let agentCode = generateRandomCode();
-
-      const checkAgentCode: any = async (code: number) => {
-        const isAgent = await AgentModel.findOne({
-          agentCode: `${company.name.slice(0, 2)}${company.name.slice(
-            -2,
-          )}${code}`,
-        }).lean();
-        if (!isAgent) {
-          return true;
-        } else {
-          agentCode = generateRandomCode();
-          return checkAgentCode(agentCode);
-        }
-      };
-
-      await checkAgentCode(agentCode);
-
-      const newAgent = new AgentModel({
-        owner_id: manager ? manager.owner_id : owner._id,
-        company_id: company._id,
+    const checkAgentCode: any = async (code: number) => {
+      const isAgent = await AgentModel.findOne({
         agentCode: `${company.name.slice(0, 2)}${company.name.slice(
           -2,
-        )}${agentCode}`,
-        ...data,
-      });
-
-      const newSavedAgent = await newAgent.save();
-      agent = newSavedAgent.toObject();
-    } else {
-      const updatedAgent = await AgentModel.findOneAndUpdate(
-        { _id: data._id },
-        { ...data },
-        { new: true },
-      );
-      if (!updatedAgent) {
-        return responses.notFound(req, res, {}, "Agent");
+        )}${code}`,
+      }).lean();
+      if (!isAgent) {
+        return true;
+      } else {
+        agentCode = generateRandomCode();
+        return checkAgentCode(agentCode);
       }
-      agent = updatedAgent.toObject();
-    }
+    };
 
+    await checkAgentCode(agentCode);
+
+    const newAgent = new AgentModel({
+      owner_id: manager ? manager.owner_id : owner._id,
+      company_id: company._id,
+      agentCode: `${company.name.slice(0, 2)}${company.name.slice(
+        -2,
+      )}${agentCode}`,
+      ...data,
+    });
+
+    const newSavedAgent = await newAgent.save();
+    const agent = newSavedAgent.toObject();
     delete agent.password;
 
-    if (!agent) {
-      return responses.serverError(req, res, {});
+    const Authorization = await jwt.sign({ _id: agent._id }, AgentAuthSecret);
+
+    const agentProfileWithAuth: IAgentProfileWithAuth = {
+      ...agent,
+      Authorization,
+    };
+
+    return responses.success(req, res, agentProfileWithAuth);
+  } catch (error) {
+    console.error(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const updateAgent = async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
+    const _id = req.params._id;
+
+    if (!_id) {
+      return responses.NotFoundRequestParam(req, res, {}, "Agent ID");
     }
+
+    const updatedAgent = await AgentModel.findOneAndUpdate(
+      { _id },
+      { ...data },
+    );
+
+    if (!updatedAgent) {
+      return responses.notFound(req, res, {}, "Agent");
+    }
+
+    const agent = updatedAgent.toObject();
+    delete agent.password;
 
     const Authorization = await jwt.sign({ _id: agent._id }, AgentAuthSecret);
 
@@ -551,7 +611,9 @@ const resetPassword = async (req: Request, res: Response) => {
 };
 
 const agentController = {
+  signup,
   addAgent,
+  updateAgent,
   login,
   getAgent,
   updateLocation,

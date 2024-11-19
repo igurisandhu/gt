@@ -65,6 +65,58 @@ const agentValidatorSchema = {
       }),
     });
   },
+  update: (req: Request) => {
+    return z.object({
+      body: z.object({
+        name: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "name",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "name",
+            type: "string",
+          }),
+        }),
+        email: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+              type: "string",
+            }),
+          })
+          .email(
+            req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "email",
+              type: "string",
+            }),
+          ),
+        phone: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+            type: "string",
+          }),
+        }),
+        country: z.string().optional(),
+        countryCode: z.string().optional(),
+        company_id: z.string().optional(),
+        team_id: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "team_id",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "team_id",
+            type: "string",
+          }),
+        }),
+      }),
+    });
+  },
   login: (req: Request) => {
     return z.object({
       body: z.object({

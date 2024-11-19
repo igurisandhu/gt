@@ -2,10 +2,7 @@ import express from "express";
 import agentController from "../../controllers/agent";
 import validate from "../../middlewares/validator";
 import agentValidatorSchema from "../../middlewares/validator/agent";
-import {
-  OwnerAndManagerAuth,
-  checkOwnerAndCompanyStatus,
-} from "../../middlewares/auth/common";
+import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
 import { companyAuth } from "../../middlewares/auth/company";
 import { ownerAuth } from "../../middlewares/auth/owner";
 import { teamAuth } from "../../middlewares/auth/team";
@@ -67,11 +64,51 @@ agentRouter.get(
  *         description: Invalid input
  */
 agentRouter.post(
-  "/add",
+  "/",
   OwnerAndManagerAuth,
   companyAuth,
   validate(agentValidatorSchema.addAgent),
   agentController.addAgent,
+);
+
+/**
+ * @swagger
+ * /agent/update:
+ *   put:
+ *     tags:
+ *       - Agent
+ *     summary: Update agent details
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               email:
+ *                 type: string
+ *                 example: "
+ *              phone:
+ *                type: string
+ *                example: "+1234567890"
+ *    responses:
+ *     200:
+ *      description: Agent updated successfully
+ *    400:
+ *     description: Invalid input
+ */
+
+agentRouter.put(
+  "/:_id",
+  OwnerAndManagerAuth,
+  companyAuth,
+  validate(agentValidatorSchema.update),
+  agentController.updateAgent,
 );
 
 /**
@@ -249,7 +286,7 @@ agentRouter.put(
  *         description: Invalid token
  */
 agentRouter.get(
-  "/verify-token",
+  "/verify-token/:token",
   ownerAuth,
   companyAuth,
   validate(agentValidatorSchema.verifyResetToken),

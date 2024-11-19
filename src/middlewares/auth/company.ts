@@ -9,7 +9,8 @@ import { IManagerProfile } from "../../types/controllers/manager";
 
 const companyAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let company_id = req.body.company_id || req.header("company_id");
+    let company_id =
+      req.body.company_id || req.query.company_id || req.header("company_id");
     const owner: IOwnerProfile = req.owner;
     const manager: IManagerProfile = req.manager;
 

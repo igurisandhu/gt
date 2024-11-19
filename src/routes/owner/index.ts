@@ -31,7 +31,7 @@ const ownerRouter = express.Router();
  *                 example: "password123"
  */
 ownerRouter.post(
-  "/signup",
+  "/",
   validate(ownerValidatorSchema.signup),
   ownerController.signup,
 );
@@ -65,7 +65,7 @@ ownerRouter.post(
 
 /**
  * @swagger
- * /owner/profile/{id}:
+ * /owner/update/{id}:
  *   put:
  *     tags:
  *       - Owner
@@ -91,7 +91,7 @@ ownerRouter.post(
  *                 example: "+1234567890"
  */
 ownerRouter.put(
-  "/profile/:id",
+  "/:id",
   ownerAuth,
   validate(ownerValidatorSchema.updateProfile),
   ownerController.updateProfile,
@@ -128,7 +128,7 @@ ownerRouter.put("/change-password", ownerAuth, ownerController.changePassword);
  *       - Owner
  *     summary: Get owner profile
  */
-ownerRouter.get("/profile", ownerAuth, ownerController.getProfile);
+ownerRouter.get("/", ownerAuth, ownerController.getProfile);
 
 /**
  * @swagger
@@ -168,7 +168,7 @@ ownerRouter.put(
  *         schema:
  *           type: string
  */
-ownerRouter.get("/verify-token", ownerController.verifyToken);
+ownerRouter.get("/verify-token/:token", ownerController.verifyToken);
 
 /**
  * @swagger

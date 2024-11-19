@@ -55,7 +55,7 @@ const getTeam = async (req: Request, res: Response) => {
 
     const { team_id }: { team_id?: string } = req.query;
 
-    let data: [] | {} = [];
+    let data: [] | object = [];
     let total = 0;
 
     if (team_id) {

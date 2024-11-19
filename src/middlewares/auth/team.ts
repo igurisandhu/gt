@@ -11,7 +11,8 @@ import { ICompanyProfile } from "../../types/controllers/company";
 
 const teamAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const team_id = req.query.team_id || req.body.team_id;
+    const team_id =
+      req.query.team_id || req.body.team_id || req.header("team_id");
     const owner: IOwnerProfile = req.owner;
     const manager: IManagerProfile = req.manager;
     const company: ICompanyProfile = req.company;
