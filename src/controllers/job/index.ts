@@ -18,24 +18,16 @@ const addJob = async (req: Request, res: Response) => {
 
     delete jobData.tasks;
 
-    if (!jobData._id) {
-      jobData.order_id = (await JobModel.countDocuments()) + 10001;
-      if (company) {
-        jobData.company_id = company._id;
-        jobData.owner_id = company._id;
-      }
+    jobData.order_id = (await JobModel.countDocuments()) + 10001;
+    if (company) {
+      jobData.company_id = company._id;
+      jobData.owner_id = company._id;
+    }
 
-      if (manager) {
-        jobData.company_id = manager.company_id;
-        jobData.owner_id = manager.owner_id;
-        jobData.manager_id = manager._id;
-      }
-    } else {
-      const job = await JobModel.findById(jobData._id);
-      if (!job) {
-        return responses.notFound(req, res, {}, "Job");
-      }
-      await TaskModel.deleteMany({ _id: { $in: job.task_id } });
+    if (manager) {
+      jobData.company_id = manager.company_id;
+      jobData.owner_id = manager.owner_id;
+      jobData.manager_id = manager._id;
     }
 
     // Create tasks and store the IDs
@@ -46,19 +38,51 @@ const addJob = async (req: Request, res: Response) => {
 
     try {
       // Create the job
-      let job;
-      if (!jobData._id) {
-        job = await JobModel.create({ ...jobData, task_id: [...taskIds] });
-      } else {
-        job = await JobModel.updateOne(
-          { _id: jobData._id },
-          { ...jobData, task_id: [...taskIds] },
-        );
-      }
+      const job = await JobModel.create({ ...jobData, task_id: [...taskIds] });
 
       return responses.success(req, res, { ...job, tasks: taskResults });
     } catch (jobError) {
       // If creating the job fails, delete the created tasks
+      console.log(jobError);
+      await TaskModel.deleteMany({ _id: { $in: taskIds } });
+
+      return responses.serverError(req, res, {});
+    }
+  } catch (error) {
+    console.log(error);
+    return responses.serverError(req, res, {});
+  }
+};
+
+const updateJob = async (req: Request, res: Response) => {
+  try {
+    const jobData = req.body;
+    const tasks: ITaskProfile[] = jobData.task_id;
+
+    delete jobData.tasks;
+
+    const job = await JobModel.findById(jobData._id);
+    if (!job) {
+      return responses.notFound(req, res, {}, "Job");
+    }
+    await TaskModel.deleteMany({ _id: { $in: job.task_id } });
+
+    // Create tasks and store the IDs
+    const taskResults = await Promise.all(
+      tasks.map((task) => TaskModel.create(task)),
+    );
+    const taskIds = taskResults.map((task) => task._id);
+
+    try {
+      // Update the job
+      await JobModel.updateOne(
+        { _id: jobData._id },
+        { ...jobData, task_id: [...taskIds] },
+      );
+
+      return responses.success(req, res, { ...job, tasks: taskResults });
+    } catch (jobError) {
+      // If updating the job fails, delete the created tasks
       console.log(jobError);
       await TaskModel.deleteMany({ _id: { $in: taskIds } });
 
@@ -161,10 +185,37 @@ const deleteJob = async (req: Request, res: Response) => {
   }
 };
 
+const assignAgent = async (req: Request, res: Response) => {
+  try {
+    const company: ICompanyProfile = req.company;
+
+    const { job_id, agent_id } = req.body;
+
+    const job = await JobModel.findOne({
+      _id: job_id,
+      company_id: company._id,
+    });
+
+    if (!job) {
+      return responses.notFound(req, res, {}, "Job");
+    }
+
+    job.agent_id = agent_id;
+
+    await job.save();
+
+    return responses.success(req, res, {});
+  } catch (error) {
+    return responses.serverError(req, res, {});
+  }
+};
+
 const taskController = {
   addJob,
+  updateJob,
   getJob,
   deleteJob,
+  assignAgent,
 };
 
 export default taskController;

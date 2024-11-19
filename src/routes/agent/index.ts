@@ -94,8 +94,17 @@ agentRouter.post(
  *               longitude:
  *                 type: number
  *                 example: 77.5946
+ *     responses:
+ *       200:
+ *         description: Location updated successfully
+ *       400:
+ *         description: Invalid input
  */
-agentRouter.post("/update-location", agentController.updateLocation);
+agentRouter.post(
+  "/update-location",
+  validate(agentValidatorSchema.updateLocation),
+  agentController.updateLocation,
+);
 
 /**
  * @swagger
@@ -117,6 +126,11 @@ agentRouter.post("/update-location", agentController.updateLocation);
  *               password:
  *                 type: string
  *                 example: "password123"
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Unauthorized
  */
 agentRouter.post(
   "/login",
@@ -126,7 +140,7 @@ agentRouter.post(
 
 /**
  * @swagger
- * /agent/{id}:
+ * /agent/{_id}:
  *   delete:
  *     tags:
  *       - Agent
@@ -138,8 +152,18 @@ agentRouter.post(
  *         schema:
  *           type: string
  *         example: "507f1f77bcf86cd799439011"
+ *     responses:
+ *       200:
+ *         description: Agent deleted successfully
+ *       404:
+ *         description: Agent not found
  */
-agentRouter.delete("/:_id", companyAuth, agentController.deleteAgent);
+agentRouter.delete(
+  "/:_id",
+  companyAuth,
+  validate(agentValidatorSchema.deleteAgent),
+  agentController.deleteAgent,
+);
 
 /**
  * @swagger
@@ -161,10 +185,16 @@ agentRouter.delete("/:_id", companyAuth, agentController.deleteAgent);
  *               newPassword:
  *                 type: string
  *                 example: "newpass123"
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Invalid input
  */
 agentRouter.put(
   "/change-password",
   companyAuth,
+  validate(agentValidatorSchema.changePassword),
   agentController.changePassword,
 );
 
@@ -185,10 +215,16 @@ agentRouter.put(
  *               email:
  *                 type: string
  *                 example: "john@example.com"
+ *     responses:
+ *       200:
+ *         description: Forgot password initiated
+ *       404:
+ *         description: Agent not found
  */
 agentRouter.put(
   "/forgot-password",
   companyAuth,
+  validate(agentValidatorSchema.forgotPassword),
   agentController.forgotPassword,
 );
 
@@ -206,11 +242,17 @@ agentRouter.put(
  *         schema:
  *           type: string
  *         example: "reset-token-123"
+ *     responses:
+ *       200:
+ *         description: Token verified successfully
+ *       404:
+ *         description: Invalid token
  */
 agentRouter.get(
   "/verify-token",
   ownerAuth,
   companyAuth,
+  validate(agentValidatorSchema.verifyResetToken),
   agentController.verifyResetToken,
 );
 
@@ -234,10 +276,16 @@ agentRouter.get(
  *               newPassword:
  *                 type: string
  *                 example: "newpass123"
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       404:
+ *         description: Invalid token
  */
 agentRouter.put(
   "/change-forgot-password",
   companyAuth,
+  validate(agentValidatorSchema.resetPassword),
   agentController.resetPassword,
 );
 
@@ -258,8 +306,17 @@ agentRouter.put(
  *               phone:
  *                 type: string
  *                 example: "+1234567890"
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       404:
+ *         description: Agent not found
  */
-agentRouter.post("/send-phone-otp", agentController.sendPhoneOTP);
+agentRouter.post(
+  "/send-phone-otp",
+  validate(agentValidatorSchema.sendPhoneOTP),
+  agentController.sendPhoneOTP,
+);
 
 /**
  * @swagger
@@ -281,10 +338,16 @@ agentRouter.post("/send-phone-otp", agentController.sendPhoneOTP);
  *               otp:
  *                 type: string
  *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Unauthorized
  */
 agentRouter.post(
   "/login-phone-otp",
   companyAuth,
+  validate(agentValidatorSchema.loginWithPhoneOTP),
   agentController.loginWithPhoneOTP,
 );
 

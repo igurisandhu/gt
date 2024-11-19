@@ -3,6 +3,8 @@ import { companyAuth } from "../../middlewares/auth/company";
 import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
 import jobController from "../../controllers/job";
 import { teamAuth } from "../../middlewares/auth/team";
+import validate from "../../middlewares/validator";
+import jobValidatorSchema from "../../middlewares/validator/job";
 
 const jobRouter = express.Router();
 
@@ -63,11 +65,13 @@ jobRouter.get("/", OwnerAndManagerAuth, companyAuth, jobController.getJob);
  *                 description: "Full stack developer role"
  *               }
  */
+
 jobRouter.post(
   "/add",
   OwnerAndManagerAuth,
   companyAuth,
   teamAuth,
+  validate(jobValidatorSchema.addJob),
   jobController.addJob,
 );
 
@@ -100,6 +104,42 @@ jobRouter.delete(
   OwnerAndManagerAuth,
   companyAuth,
   jobController.deleteJob,
+);
+
+/**
+ * @swagger
+ * /job/assign_agent:
+ *   put:
+ *     summary: Assign agent to job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             job_id: "123"
+ *             agent_id: "456"
+ *     responses:
+ *       200:
+ *         description: Agent assigned successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Agent assigned successfully"
+ *               job: {
+ *                 _id: "123",
+ *                 title: "Software Engineer",
+ *                 description: "Full stack developer role"
+ *               }
+ */
+
+jobRouter.put(
+  "/assign_agent",
+  OwnerAndManagerAuth,
+  companyAuth,
+  jobController.assignAgent,
 );
 
 export default jobRouter;

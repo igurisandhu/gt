@@ -148,7 +148,11 @@ ownerRouter.get("/profile", ownerAuth, ownerController.getProfile);
  *                 type: string
  *                 example: "john@example.com"
  */
-ownerRouter.put("/forgot-password", ownerController.forgotPassword);
+ownerRouter.put(
+  "/forgot-password",
+  validate(ownerValidatorSchema.forgotPassword),
+  ownerController.forgotPassword,
+);
 
 /**
  * @swagger
@@ -189,6 +193,7 @@ ownerRouter.get("/verify-token", ownerController.verifyToken);
  */
 ownerRouter.put(
   "/change-forgot-password",
+  validate(ownerValidatorSchema.changeForgotPassword),
   ownerController.changeForgotPassword,
 );
 
@@ -210,7 +215,11 @@ ownerRouter.put(
  *                 type: string
  *                 example: "+1234567890"
  */
-ownerRouter.post("/send-phone-otp", ownerController.sendPhoneOTP);
+ownerRouter.post(
+  "/send-phone-otp",
+  validate(ownerValidatorSchema.sendPhoneOTP),
+  ownerController.sendPhoneOTP,
+);
 
 /**
  * @swagger
@@ -233,6 +242,10 @@ ownerRouter.post("/send-phone-otp", ownerController.sendPhoneOTP);
  *                 type: string
  *                 example: "123456"
  */
-ownerRouter.post("/login-phone-otp", ownerController.loginWithPhoneOTP);
+ownerRouter.post(
+  "/login-phone-otp",
+  validate(ownerValidatorSchema.loginWithPhoneOTP),
+  ownerController.loginWithPhoneOTP,
+);
 
 export default ownerRouter;

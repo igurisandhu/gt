@@ -167,6 +167,7 @@ managerRouter.delete(
 managerRouter.put(
   "/change-password",
   ownerAuth,
+  validate(managerValidatorSchema.changePassword),
   managerController.changePassword,
 );
 
@@ -188,7 +189,11 @@ managerRouter.put(
  *                 type: string
  *                 example: "john@example.com"
  */
-managerRouter.put("/forgot-password", managerController.forgotPassword);
+managerRouter.put(
+  "/forgot-password",
+  validate(managerValidatorSchema.forgotPassword),
+  managerController.forgotPassword,
+);
 
 /**
  * @swagger
@@ -228,7 +233,11 @@ managerRouter.get("/verify-token", managerController.verifyToken);
  *                 type: string
  *                 example: "newpassword123"
  */
-managerRouter.put("/change-forgot-password", managerController.resetPassword);
+managerRouter.put(
+  "/change-forgot-password",
+  validate(managerValidatorSchema.changeForgotPassword),
+  managerController.resetPassword,
+);
 
 /**
  * @swagger
@@ -248,7 +257,11 @@ managerRouter.put("/change-forgot-password", managerController.resetPassword);
  *                 type: string
  *                 example: "+1234567890"
  */
-managerRouter.post("/send-phone-otp", managerController.sendPhoneOtp);
+managerRouter.post(
+  "/send-phone-otp",
+  validate(managerValidatorSchema.sendPhoneOTP),
+  managerController.sendPhoneOtp,
+);
 
 /**
  * @swagger
@@ -271,6 +284,10 @@ managerRouter.post("/send-phone-otp", managerController.sendPhoneOtp);
  *                 type: string
  *                 example: "123456"
  */
-managerRouter.post("/login-phone-otp", managerController.loginWithPhoneOTP);
+managerRouter.post(
+  "/login-phone-otp",
+  validate(managerValidatorSchema.loginWithPhoneOTP),
+  managerController.loginWithPhoneOTP,
+);
 
 export default managerRouter;

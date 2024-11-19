@@ -3,6 +3,8 @@ import { companyAuth } from "../../middlewares/auth/company";
 import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
 import teamController from "../../controllers/team";
 import { ownerAuth } from "../../middlewares/auth/owner";
+import validate from "../../middlewares/validator";
+import teamValidatorSchema from "../../middlewares/validator/team";
 
 const teamRouter = express.Router();
 
@@ -58,7 +60,13 @@ teamRouter.get("/", OwnerAndManagerAuth, companyAuth, teamController.getTeam);
  *       201:
  *         description: Team created successfully
  */
-teamRouter.post("/add", ownerAuth, companyAuth, teamController.addTeam);
+teamRouter.post(
+  "/add",
+  validate(teamValidatorSchema.addTeam),
+  ownerAuth,
+  companyAuth,
+  teamController.addTeam,
+);
 
 /**
  * @swagger

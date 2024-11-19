@@ -30,67 +30,15 @@ const ownerValidatorSchema = {
               type: "string",
             }),
           ),
-        phone: z.number({
+        phone: z.string({
           required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
             key: "phone",
           }),
           invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
             key: "phone",
-            type: "number",
+            type: "string",
           }),
         }),
-        // .min(5, req.t('INVALID_REQUEST_PARAM_VALUE', {key: 'phone'})).max(13, req.t('INVALID_REQUEST_PARAM_VALUE', {key: 'phone'})),
-        phoneCountryCode: z
-          .number({
-            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "phoneCountryCode",
-            }),
-            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "phoneCountryCode",
-              type: "number",
-            }),
-          })
-          .optional(),
-        // .max(3, req.t('INVALID_REQUEST_PARAM_VALUE')),
-        country: z
-          .string({
-            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "country",
-            }),
-            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "country",
-              type: "string",
-            }),
-          })
-          .optional(),
-        countryCodeAlphabet: z
-          .string({
-            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "countryCodeAlphabet",
-            }),
-            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "countryCodeAlphabet",
-              type: "string",
-            }),
-          })
-          .optional(),
-        avatar: z
-          .string({
-            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "avatar",
-            }),
-            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "avatar",
-              type: "url",
-            }),
-          })
-          .url(
-            req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "avatar",
-              type: "url",
-            }),
-          )
-          .optional(),
         password: z
           .string({
             required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
@@ -105,8 +53,8 @@ const ownerValidatorSchema = {
       }),
     });
   },
-  login: (req: Request) =>
-    z.object({
+  login: (req: Request) => {
+    return z.object({
       body: z.object({
         email: z
           .string({
@@ -136,7 +84,8 @@ const ownerValidatorSchema = {
           })
           .min(8, req.t("WORNG_PASSWORD_FORMAT")),
       }),
-    }),
+    });
+  },
   updateProfile: (req: Request) => {
     return z.object({
       body: z.object({
@@ -149,6 +98,50 @@ const ownerValidatorSchema = {
             type: "string",
           }),
         }),
+        phone: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+            type: "string",
+          }),
+        }),
+        country: z.string().optional(),
+        countryCode: z.string().optional(),
+        avatar: z.string().url().optional(),
+      }),
+    });
+  },
+  changePassword: (req: Request) => {
+    return z.object({
+      body: z.object({
+        oldPassword: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "oldPassword",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "oldPassword",
+            type: "string",
+          }),
+        }),
+        newPassword: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "newPassword",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "newPassword",
+              type: "string",
+            }),
+          })
+          .min(8, req.t("WORNG_PASSWORD_FORMAT")),
+      }),
+    });
+  },
+  forgotPassword: (req: Request) => {
+    return z.object({
+      body: z.object({
         email: z
           .string({
             required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
@@ -165,33 +158,68 @@ const ownerValidatorSchema = {
               type: "string",
             }),
           ),
-        phone: z
-          .string({
-            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "phone",
-            }),
-            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-              key: "phone",
-              type: "string",
-            }),
-          })
-          .min(10, req.t("INVALID_REQUEST_PARAM_VALUE", { key: "mobile" }))
-          .max(10, req.t("INVALID_REQUEST_PARAM_VALUE", { key: "mobile" })),
-        companyName: z.string({
+      }),
+    });
+  },
+  changeForgotPassword: (req: Request) => {
+    return z.object({
+      body: z.object({
+        token: z.string({
           required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "companyName",
+            key: "token",
           }),
           invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "companyName",
+            key: "token",
             type: "string",
           }),
         }),
-        image: z.string({
+        newPassword: z
+          .string({
+            required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "newPassword",
+            }),
+            invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+              key: "newPassword",
+              type: "string",
+            }),
+          })
+          .min(8, req.t("WORNG_PASSWORD_FORMAT")),
+      }),
+    });
+  },
+  sendPhoneOTP: (req: Request) => {
+    return z.object({
+      body: z.object({
+        phone: z.string({
           required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "image",
+            key: "phone",
           }),
           invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
-            key: "image",
+            key: "phone",
+            type: "string",
+          }),
+        }),
+      }),
+    });
+  },
+  loginWithPhoneOTP: (req: Request) => {
+    return z.object({
+      body: z.object({
+        phone: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "phone",
+            type: "string",
+          }),
+        }),
+        otp: z.string({
+          required_error: req.t("NOT_FOUND_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "otp",
+          }),
+          invalid_type_error: req.t("INVALID_REQUEST_PARAM_TYPE_RESPONSE", {
+            key: "otp",
             type: "string",
           }),
         }),

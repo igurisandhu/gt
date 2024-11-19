@@ -3,6 +3,8 @@ import { ownerAuth } from "../../middlewares/auth/owner";
 import { companyAuth } from "../../middlewares/auth/company";
 import companyController from "../../controllers/company";
 import { OwnerAndManagerAuth } from "../../middlewares/auth/common";
+import validate from "../../middlewares/validator";
+import companyValidatorSchema from "../../middlewares/validator/company";
 
 const companyRouter = express.Router();
 
@@ -78,7 +80,12 @@ companyRouter.get(
  *               address: "456 Street"
  *               email: "newcompany@test.com"
  */
-companyRouter.post("/add", ownerAuth, companyController.addCompany);
+companyRouter.post(
+  "/add",
+  ownerAuth,
+  validate(companyValidatorSchema.addCompany),
+  companyController.addCompany,
+);
 
 /**
  * @swagger
@@ -103,6 +110,11 @@ companyRouter.post("/add", ownerAuth, companyController.addCompany);
  *             example:
  *               message: "Company deleted successfully"
  */
-companyRouter.delete("/:_id", ownerAuth, companyController.deleteCompany);
+companyRouter.delete(
+  "/:_id",
+  ownerAuth,
+  validate(companyValidatorSchema.updateCompany),
+  companyController.deleteCompany,
+);
 
 export default companyRouter;
